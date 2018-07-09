@@ -43,8 +43,8 @@
 
     foreach ($dirs as $dir) {
         $dir = str_replace($path.\'/\', \'\', $dir);
-        $selected = ($dir === $currpath) ? "selected" : "";
-        echo \'<option value="/\'. $dir .\'" selected="\'. $selected .\'">\'. $dir .\'</option>\';
+        $selected = ($dir === $currpath) ? \'selected="selected"\' : "";
+        echo \'<option value="/\'. $dir .\'" \'. $selected .\'>\'. $dir .\'</option>\';
     }
 ?>
 ';
@@ -113,3 +113,4 @@
         </div>
     </div>
 </div>
+
