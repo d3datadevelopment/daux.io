@@ -3,6 +3,7 @@
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Todaymade\Daux\Daux;
 
 class DauxCommand extends SymfonyCommand
@@ -27,7 +28,7 @@ class DauxCommand extends SymfonyCommand
         $keys = explode('.', $key);
         while (count($keys) > 1) {
             $key = array_shift($keys);
-            if (! isset($array[$key]) || ! is_array($array[$key])) {
+            if (!isset($array[$key]) || !is_array($array[$key])) {
                 $array[$key] = [];
             }
             $array = &$array[$key];
@@ -39,7 +40,7 @@ class DauxCommand extends SymfonyCommand
     private function applyConfiguration(array $options, Daux $daux)
     {
         $values = array_map(
-            function ($value) {
+            function($value) {
                 return array_map("trim", explode('=', $value));
             },
             $options
@@ -50,9 +51,9 @@ class DauxCommand extends SymfonyCommand
         }
     }
 
-    protected function prepareDaux(InputInterface $input)
+    protected function prepareDaux(InputInterface $input, OutputInterface $output)
     {
-        $daux = new Daux(Daux::STATIC_MODE);
+        $daux = new Daux(Daux::STATIC_MODE, $output);
 
         // Set the format if requested
         if ($input->hasOption('format') && $input->getOption('format')) {

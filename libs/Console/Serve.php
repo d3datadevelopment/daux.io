@@ -30,7 +30,7 @@ class Serve extends DauxCommand
         $host = $input->getOption('host');
         $port = $input->getOption('port');
 
-        $daux = $this->prepareDaux($input);
+        $daux = $this->prepareDaux($input, $output);
 
         // Daux can only serve HTML
         $daux->getParams()->setFormat('html');
@@ -40,7 +40,7 @@ class Serve extends DauxCommand
         putenv('DAUX_SOURCE=' . $daux->getParams()->getDocumentationDirectory());
         putenv('DAUX_THEME=' . $daux->getParams()->getThemesPath());
         putenv('DAUX_CONFIGURATION=' . $daux->getParams()->getConfigurationOverrideFile());
-		putenv('DAUX_EXTENSION=' . DAUX_EXTENSION);
+        putenv('DAUX_EXTENSION=' . DAUX_EXTENSION);
 
         $base = ProcessUtils::escapeArgument(__DIR__ . '/../../');
         $binary = ProcessUtils::escapeArgument((new PhpExecutableFinder)->find(false));
