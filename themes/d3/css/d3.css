@@ -189,3 +189,10 @@ li {
 .Search__field {
     border-radius: 4px;
 }
+
+.versionselector {
+    padding: 0 20px;
+    font-family: "Roboto Slab",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+    font-size: 14px;
+    color: #f7f7f7;
+}
