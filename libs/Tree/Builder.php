@@ -75,10 +75,16 @@ class Builder
             }
 
             if ($file->isDir()) {
-                $new = new Directory($node, static::removeSortingInformations($file->getFilename()), $file);
+                $title = static::removeSortingInformations($file->getFilename());
+                $new = new Directory($node, $title, $file);
                 $new->setName(static::getName($file->getPathName()));
                 $new->setTitle(str_replace('_', ' ', static::removeSortingInformations($new->getName())));
                 static::build($new, $ignore);
+
+                $index = $new->getLocalIndexPage();
+                if ($index && $index->getTitle() != $title) {
+                    $new->setTitle($index->getTitle());
+                }
             } else {
                 static::createContent($node, $file);
             }
@@ -99,7 +105,7 @@ class Builder
         $config = $parent->getConfig();
 
         if (!in_array($file->getExtension(), $config['valid_content_extensions'])) {
-            $uri = static::removeSortingInformations($file->getFilename());
+            $uri = $file->getFilename();
 
             $entry = new Raw($parent, $uri, $file);
             $entry->setTitle(str_replace('_', ' ', static::removeSortingInformations($name)));
