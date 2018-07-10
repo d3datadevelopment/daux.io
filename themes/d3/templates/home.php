@@ -21,6 +21,40 @@
             <?= ($params['author'])? '<div>' . $this->translate("author") . ': ' . $params['author'] . '</div>' : '' ?>
             <?= ($params['moduledate'])? '<div>' . $this->translate("moduledate") . ': ' . $params['moduledate'] . '</div>' : '' ?>
             <?= ($params['moduleversion'])? '<div>' . $this->translate("version") . ': ' . $params['moduleversion'] . '</div>' : '' ?>
+
+            <?php
+
+            if ($params['versionselector']) {
+                echo "<div>";
+                echo $this->translate("selectversion").': ';
+
+                $code = '
+<select onchange="window.location.href=this.options[this.selectedIndex].value" size="1">
+
+<?php
+    $versionpath = implode("/", array_slice(explode("/", $_SERVER[\'SCRIPT_NAME\']), '. $params['versiondirectoryindex'] .'));
+    $modulepath = implode("/", array_slice(explode("/", $_SERVER[\'SCRIPT_NAME\']), 0, '. $params['versiondirectoryindex'] .'));
+    $path = str_replace($versionpath, "", $_SERVER[\'SCRIPT_FILENAME\']);
+    $paths = explode(\'/\', $versionpath);
+    $currpath = $paths[0];
+    
+    $dirs = array_filter(glob($path . \'/*\'), \'is_dir\');
+    arsort($dirs);
+
+    foreach ($dirs as $dir) {
+        $dir = str_replace($path.\'/\', \'\', $dir);
+        $selected = ($dir === $currpath) ? \'selected="selected"\' : "";
+        echo \'<option value="\'. $modulepath .\'/\'. $dir .\'" \'. $selected .\'>\'. $dir .\'</option>\';
+    }
+?>
+';
+
+                echo $code;
+                echo "</select>";
+                echo "</div>";
+            }
+            ?>
+
             <?= ($params['editors'])? '<div>' . $this->translate("editors") . ': ' . $params['editors'] . '</div>' : '' ?>
         </div>
     </div>
