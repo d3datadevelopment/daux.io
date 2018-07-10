@@ -33,18 +33,19 @@
 <select onchange="window.location.href=this.options[this.selectedIndex].value" size="1">
 
 <?php
-    $path = str_replace($_SERVER[\'SCRIPT_NAME\'], "", $_SERVER[\'SCRIPT_FILENAME\']);
-
-    $paths = explode(\'/\', $_SERVER[\'SCRIPT_NAME\']);
-    $currpath = $paths[1];
-
+    $versionpath = implode("/", array_slice(explode("/", $_SERVER[\'SCRIPT_NAME\']), '. $params['versiondirectoryindex'] .'));
+    $modulepath = implode("/", array_slice(explode("/", $_SERVER[\'SCRIPT_NAME\']), 0, '. $params['versiondirectoryindex'] .'));
+    $path = str_replace($versionpath, "", $_SERVER[\'SCRIPT_FILENAME\']);
+    $paths = explode(\'/\', $versionpath);
+    $currpath = $paths[0];
+    
     $dirs = array_filter(glob($path . \'/*\'), \'is_dir\');
     arsort($dirs);
 
     foreach ($dirs as $dir) {
         $dir = str_replace($path.\'/\', \'\', $dir);
         $selected = ($dir === $currpath) ? \'selected="selected"\' : "";
-        echo \'<option value="/\'. $dir .\'" \'. $selected .\'>\'. $dir .\'</option>\';
+        echo \'<option value="\'. $modulepath .\'/\'. $dir .\'" \'. $selected .\'>\'. $dir .\'</option>\';
     }
 ?>
 ';
@@ -113,4 +114,3 @@
         </div>
     </div>
 </div>
-
