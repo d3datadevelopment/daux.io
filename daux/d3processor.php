@@ -125,11 +125,14 @@ class d3DocumentRenderer implements BlockRendererInterface
         $daux = new Daux(Daux::STATIC_MODE, $output);
         $daux->initializeConfiguration();
 
-        $variables = $daux->getParams()['variables'];
-        if (isset($variables) && is_array($variables) && count($variables)) {
-            foreach ($variables as $varname => $varvalue) {
-                $pattern = '/{\$'.$varname.'}/mU';
-                $wholeDoc = preg_replace($pattern, $varvalue, $wholeDoc);
+        $params = $daux->getParams();
+        if (isset($params['variables'])) {
+            $variables = $params['variables'];
+            if (isset($variables) && is_array($variables) && count($variables)) {
+                foreach ($variables as $varname => $varvalue) {
+                    $pattern = '/{\$'.$varname.'}/mU';
+                    $wholeDoc = preg_replace($pattern, $varvalue, $wholeDoc);
+                }
             }
         }
 
