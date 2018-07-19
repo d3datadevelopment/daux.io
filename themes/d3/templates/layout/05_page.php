@@ -25,7 +25,8 @@
 
             <?php
 
-            if ($params['versionselector']) {
+            if (isset($params['versionselector']) && $params['versionselector'] && 
+                isset($params['versiondirectoryindex']) && $params['versiondirectoryindex']) {
                 echo "<div class='versionselector'>";
                 echo $this->translate("selectversion").': ';
 
