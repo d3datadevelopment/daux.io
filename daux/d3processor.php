@@ -123,6 +123,14 @@ class d3DocumentRenderer implements BlockRendererInterface
 
         $output = new NullOutput();
         $daux = new Daux(Daux::STATIC_MODE, $output);
+
+        foreach ($_SERVER['argv'] as $arg) {
+            if (stristr($arg, '--source=')) {
+                $docsdir = trim(str_replace('--source=', '', $arg));
+                $daux->getParams()->setDocumentationDirectory($docsdir);
+            }
+        }
+
         $daux->initializeConfiguration();
 
         $params = $daux->getParams();
