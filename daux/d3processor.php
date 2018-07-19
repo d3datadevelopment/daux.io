@@ -122,7 +122,7 @@ class d3DocumentRenderer implements BlockRendererInterface
         $wholeDoc = $htmlRenderer->renderBlocks($block->children());
 
         $output = new NullOutput();
-        $daux = new Daux(Daux::LIVE_MODE, $output);
+        $daux = new Daux(Daux::STATIC_MODE, $output);
         $daux->initializeConfiguration();
 
         $variables = $daux->getParams()['variables'];
