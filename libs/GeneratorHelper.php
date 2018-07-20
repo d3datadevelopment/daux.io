@@ -43,14 +43,22 @@ class GeneratorHelper
             throw new RuntimeException("Cannot copy '$source' to '$destination'");
         }
 
+        $aExclDirs = array(
+            'scss',
+            'templates'
+        );
+        $aExclFiles = array(
+            'config.json'
+        );
+
         while (false !== ($file = readdir($dir))) {
             if ($file != '.' && $file != '..') {
-                if (is_dir($source . DIRECTORY_SEPARATOR . $file)) {
+                if (is_dir($source . DIRECTORY_SEPARATOR . $file) && false == in_array($file, $aExclDirs)) {
                     static::copyRecursive(
                         $source . DIRECTORY_SEPARATOR . $file,
                         $destination . DIRECTORY_SEPARATOR . $file
                     );
-                } else {
+                } elseif (false == in_array($file, $aExclFiles)) {
                     copy($source . DIRECTORY_SEPARATOR . $file, $destination . DIRECTORY_SEPARATOR . $file);
                 }
             }
