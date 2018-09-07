@@ -1,0 +1,10 @@
+{
+    "favicon": "<theme_url>img/favicon.png",
+    "css": ["<theme_url>css/theme-blue.min.css","<theme_url>css/d3.css"],
+    "js": [
+        "<theme_url>js/jquery-1.11.3.min.js",
+        "<theme_url>js/highlight.pack.js",
+        "<theme_url>js/daux.js",
+        "<theme_url>js/fontawesome-all.js"
+    ]
+}
