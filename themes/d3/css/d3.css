@@ -196,3 +196,15 @@ li {
     font-size: 14px;
     color: #f7f7f7;
 }
+
+@media (max-width:768px){
+    .HomepageTitle h2 {
+        font-size: 30px;
+    }
+}
+
+@media (max-width:571px){
+    .HomepageTitle h2 {
+        font-size: 24px;
+    }
+}
