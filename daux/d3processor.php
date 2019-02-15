@@ -170,7 +170,7 @@ class d3TextRenderer implements InlineRendererInterface
         $content = $htmlRenderer->escape($inline->getContent());
 
         $search = array(
-            'D3', 'D³', 'D&sup3;'
+            '(D3)', '(D³)', '(D&sup3;)'
         );
         $replace = "<i class='fab fa-d3 d3fa-color-blue'></i>";
         $content = str_replace($search, $replace, $content);
