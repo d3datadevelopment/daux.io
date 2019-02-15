@@ -20,7 +20,6 @@
         <div class="details">
             <?= ($params['author'])? '<div>' . $this->translate("author") . ': ' . $params['author'] . '</div>' : '' ?>
             <?= ($params['moduledate'])? '<div>' . $this->translate("moduledate") . ': ' . $params['moduledate'] . '</div>' : '' ?>
-            <?= ($params['moduleversion'])? '<div>' . $this->translate("version") . ': ' . $params['moduleversion'] . '</div>' : '' ?>
 
             <?php
 
@@ -53,6 +52,8 @@
                 echo $code;
                 echo "</select>";
                 echo "</div>";
+            } else {
+                echo ($params['moduleversion'])? '<div>' . $this->translate("version") . ': ' . $params['moduleversion'] . '</div>' : '';
             }
             ?>
 
@@ -93,13 +94,22 @@
 <div class="HomepageFooter">
     <div class="Container">
         <div class="Container--inner">
-            <?php if (!empty($params['html']['links'])) { ?>
-                <ul class="HomepageFooter__links">
+            <ul class="HomepageFooter__links">
+                <li><a href="https://www.oxidmodule.com" target="_blank">Shop</a></li>
+                <li><a href="https://blog.oxidmodule.com" target="_blank">Blog</a></li>
+                <li><a href="https://faq.oxidmodule.com" target="_blank">FAQ</a></li>
+                <li><a href="https://docs.oxidmodule.com" target="_blank">Dokumentationen</a></li>
+                <li><a href="https://support.oxidmodule.com" target="_blank">D³ Support Center</a></li>
+                <li><a href="https://www.oxidmodule.com/kontakt" target="_blank">Kontakt</a></li>
+                <li><a href="https://www.oxidmodule.com/impressum" target="_blank">Impressum</a></li>
+                <?php if (!empty($params['html']['links'])) { ?>
                     <?php foreach ($params['html']['links'] as $name => $url) {
-                    echo '<li><a href="' . $url . '" target="_blank">' . $name . '</a></li>';
-                } ?>
-                </ul>
-            <?php } ?>
+                        if (!in_array($name, array('Shop', 'Blog', 'FAQ', 'D³ Support-Center', 'Kontakt', 'Impressum'))) {
+                            echo '<li><a href="' . $url . '" target="_blank">' . $name . '</a></li>';
+                        }
+                    } ?>
+                <?php } ?>
+            </ul>
 
             <?php if (!empty($params['html']['twitter'])) { ?>
                 <div class="HomepageFooter__twitter">
