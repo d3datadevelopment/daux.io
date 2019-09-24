@@ -34,17 +34,17 @@
 This is a list of sites using Daux.io:
 
 - With a custom theme:
+    * [Crafty](https://swissquote.github.io/crafty)	
     * [Pixolution flow](https://docs.pixolution.org)
-	* [Crafty](https://swissquote.github.io/crafty)
+	* [Soisy](https://doc.soisy.it/)
     * [Vulkan Tutorial](https://vulkan-tutorial.com)
-    * [TrackJs](http://docs.trackjs.com)
+	* [3Q](https://docs.3q.video/)
 - With the default Theme
     * [Daux.io](https://daux.io/)
-    * [Gltn - An open-source word processor webapp](http://felkerdigitalmedia.com/gltn/docs/)
-    * [Invade & Annex 3 - An Arma 3 Co-operative Mission](http://ia3.ahoyworld.co.uk/)
-    * [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
+	* [DoctrineWatcher](https://dsentker.github.io/WatcherDocumentation/)
+	* [DrupalGap](http://docs.drupalgap.org/8/)
     * [ICADMIN: An admin panel powered by CodeIgniter.](http://istocode.com/shared/ic-admin/)
-    * [Cumulus TV: Android TV app that turns any stream/page into a Live Channel](http://cumulustv.herokuapp.com)
+    * [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
     * [Nuntius: A PHP framework for bots](https://roysegall.github.io/nuntius-bot/)
 
 Do you use Daux.io? Send me a pull request or open an [issue](https://github.com/dauxio/daux.io/issues) and I will add you to the list.
@@ -71,7 +71,7 @@ If the command isn't found, ensure your `$PATH` contains `~/.composer/vendor/bin
 Or if you wish to use Docker, the start of the command will be :
 
 ```bash
-docker run --rm -it -w /build -v "$PWD":/build daux/daux.io daux
+docker run --rm -it -w /build -v "$PWD":/build -u "$(id -u):$(id -g)" daux/daux.io daux
 ```
 
 ## Run on a server
@@ -233,15 +233,15 @@ You can then point your browser to http://localhost:8086
 
 ## PHP Requirements
 
-Daux.io is compatible with PHP 5.6 and up.
+Daux.io is compatible with PHP 7.1.3 and up.
 
-The reason is because some dependencies we have (mainly Symfony and Guzzle) do not support php 5.4 anymore.
+The reason is because some dependencies we have (mainly Symfony and Guzzle) do not support PHP 5.6 anymore.
 
 ### Extensions
 
 PHP Needs the following extension to work : `php-mbstring` and `php-xml`.
 
-If you encounter an error similar to `utf8_decode() not found` this means that you're missing the `php-xml` package. (We've seen it happen only on PHP 7)
+If you encounter an error similar to `utf8_decode() not found` this means that you're missing the `php-xml` package.
 
 ## Support
 

@@ -16,7 +16,7 @@ use Todaymade\Daux\Tree\Raw;
 
 class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
 {
-    use RunAction;
+    use RunAction, HTMLUtils;
 
     /** @var Daux */
     protected $daux;
@@ -43,30 +43,6 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
         return [
             'markdown' => new ContentType($this->daux->getParams()),
         ];
-    }
-
-    protected function ensureEmptyDestination($destination)
-    {
-        if (is_dir($destination)) {
-            GeneratorHelper::rmdir($destination);
-        } else {
-            mkdir($destination);
-        }
-    }
-
-    /**
-     * Copy all files from $local to $destination
-     *
-     * @param string $destination
-     * @param string $local_base
-     */
-    protected function copyThemes($destination, $local_base)
-    {
-        mkdir($destination . DIRECTORY_SEPARATOR . 'themes');
-        GeneratorHelper::copyRecursive(
-            $local_base,
-            $destination . DIRECTORY_SEPARATOR . 'themes'
-        );
     }
 
     public function generateAll(InputInterface $input, OutputInterface $output, $width)
@@ -96,13 +72,14 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
 
         $this->generateRecursive($this->daux->tree, $destination, $params, $output, $width, $params['html']['search']);
 
+        GeneratorHelper::copyRecursive(
+            $this->daux->local_base . DIRECTORY_SEPARATOR . 'daux_libraries' . DIRECTORY_SEPARATOR,
+            $destination . DIRECTORY_SEPARATOR . 'daux_libraries'
+        );
+
         if ($params['html']['search']) {
-            GeneratorHelper::copyRecursive(
-                $this->daux->local_base . DIRECTORY_SEPARATOR . 'tipuesearch' . DIRECTORY_SEPARATOR,
-                $destination . DIRECTORY_SEPARATOR . 'tipuesearch'
-            );
             file_put_contents(
-                $destination . DIRECTORY_SEPARATOR . 'tipuesearch' . DIRECTORY_SEPARATOR . 'tipuesearch_content.json',
+                $destination . DIRECTORY_SEPARATOR . 'daux_search_index.json',
                 json_encode(['pages' => $this->indexed_pages])
             );
 

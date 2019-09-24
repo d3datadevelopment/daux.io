@@ -189,7 +189,7 @@ class DauxHelper
                 continue;
             }
 
-            $node = urldecode($node);
+            $node = DauxHelper::slug(urldecode($node));
 
             // if the node exists in the current request tree,
             // change the $tree variable to reference the new
@@ -241,18 +241,21 @@ class DauxHelper
      */
     public static function slug($title)
     {
+        // Convert to ASCII
         foreach (static::charsArray() as $key => $value) {
             $title = str_replace($value, $key, $title);
         }
 
+        // Remove unsupported characters
         $title = preg_replace('/[^\x20-\x7E]/u', '', $title);
 
         $separator = '_';
         // Convert all dashes into underscores
         $title = preg_replace('![' . preg_quote('-') . ']+!u', $separator, $title);
 
-        // Remove all characters that are not the separator, letters, numbers, or whitespace.
-        $title = preg_replace('![^' . preg_quote($separator) . '\pL\pN\s]+!u', '', $title);
+        // Remove all characters that are not valid in a URL: 
+        // $-_.+!*'(), separator, letters, numbers, or whitespace.
+        $title = preg_replace('![^-' . preg_quote($separator) . '\!\'\(\),\.\+\*\$\pL\pN\s]+!u', '', $title);
 
         // Replace all separator characters and whitespace by a single separator
         $title = preg_replace('![' . preg_quote($separator) . '\s]+!u', $separator, $title);
@@ -485,6 +488,11 @@ class DauxHelper
      * @return false|null|string
      */
     public static function findLocation($path, $basedir, $var, $type) {
+        // VFS, used only in tests
+        if (substr($path, 0, 6) == "vfs://") {
+            return $path;
+        }
+
         // When running through `daux --serve` we set an environment variable to know where we started from
         $env = getenv($var);
         if ($env && DauxHelper::is($env, $type)) {

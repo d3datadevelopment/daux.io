@@ -75,7 +75,7 @@ class Builder
             }
 
             if ($file->isDir()) {
-                $title = static::removeSortingInformations($file->getFilename());
+                $title = DauxHelper::slug(static::removeSortingInformations($file->getFilename()));
                 $new = new Directory($node, $title, $file);
                 $new->setName(static::getName($file->getPathName()));
                 $new->setTitle(str_replace('_', ' ', static::removeSortingInformations($new->getName())));
@@ -115,6 +115,7 @@ class Builder
         }
 
         $uri = static::removeSortingInformations($name);
+        $uri = DauxHelper::slug($uri);
         if ($config->isStatic()) {
             $uri .= '.html';
         }

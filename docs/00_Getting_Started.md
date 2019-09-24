@@ -36,13 +36,19 @@
 
 This is a list of sites using Daux.io:
 
-* [Daux.io](https://dauxio.github.io/)
-* [DoctrineWatcher](https://dsentker.github.io/WatcherDocumentation/)
-* [jDrupal](http://jdrupal.easystreet3.com/8/docs/)
-* [DrupalGap](http://docs.drupalgap.org/8/)
-* [Invade & Annex 3 - An Arma 3 Co-operative Mission](http://ia3.ahoyworld.co.uk/)
-* [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
-* [ICADMIN: An admin panel powered by CodeIgniter.](http://istocode.com/shared/ic-admin/)
+- With a custom theme:
+    * [Crafty](https://swissquote.github.io/crafty)	
+    * [Pixolution flow](https://docs.pixolution.org)
+	* [Soisy](https://doc.soisy.it/)
+    * [Vulkan Tutorial](https://vulkan-tutorial.com)
+    * [3Q](https://docs.3q.video/)
+- With the default Theme
+    * [Daux.io](https://daux.io/)
+	* [DoctrineWatcher](https://dsentker.github.io/WatcherDocumentation/)
+	* [DrupalGap](http://docs.drupalgap.org/8/)
+    * [ICADMIN: An admin panel powered by CodeIgniter.](http://istocode.com/shared/ic-admin/)
+    * [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
+    * [Nuntius: A PHP framework for bots](https://roysegall.github.io/nuntius-bot/)
 
 Do you use Daux.io? Send us a pull request or open an [issue](https://github.com/dauxio/daux.io/issues) and I will add you to the list.
 
@@ -63,7 +69,7 @@ daux generate
 
 You can then use the `daux` command line to generate your documentation.
 
-If the command isn't found, ensure your `$PATH` contains `~/.composer/vendor/bin`
+If the command isn't found, ensure your `$PATH` contains `~/.composer/vendor/bin` or `~/.config/composer/vendor/bin`.
 
 #### Docker
 
@@ -139,9 +145,9 @@ Now that you got the basics, you can also [see what you can configure](05_Config
 
 ## PHP Requirements
 
-Daux.io is compatible with PHP 5.6 and up.
+Daux.io is compatible with PHP 7.1.3 and up.
 
-The reason is because some dependencies we have do not support php 5.5 anymore.
+The reason is because some dependencies we have (mainly Symfony and Guzzle) do not support PHP 5.6 anymore.
 
 ### Extensions
 

@@ -26,6 +26,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- JS -->
+    <script>
+        window.base_url = "<?php echo $base_url?>";
+        document.documentElement.classList.remove('no-js');
+    </script>
+
     <!-- Font -->
     <?php foreach ($params['theme']['fonts'] as $font) {
         echo "<link href='$font' rel='stylesheet' type='text/css'>";
@@ -37,15 +43,11 @@
     } ?>
 
     <?php if ($params['html']['search']) { ?>
-        <!-- Tipue Search -->
-        <link href="<?= $base_url; ?>tipuesearch/tipuesearch.css" rel="stylesheet">
+        <!-- Search -->
+        <link href="<?= $base_url; ?>daux_libraries/search.css" rel="stylesheet">
     <?php } ?>
-
-    <!--[if lt IE 9]>
-    <script src="<?= $base_url; ?>themes/daux/js/html5shiv-3.7.3.min.js"></script>
-    <![endif]-->
 </head>
-<body class="<?= $params['html']['float'] ? 'with-float' : ''; ?> <?= $this->section('classes'); ?>">
+<body class="<?= $this->section('classes'); ?>">
     <?= $this->section('content'); ?>
 
     <?php
@@ -62,19 +64,7 @@
         echo '<script src="' . $js . '"></script>';
     } ?>
 
-    <?php if ($params['html']['search']) { ?>
-        <!-- Tipue Search -->
-        <script type="text/javascript" src="<?php echo $base_url; ?>tipuesearch/tipuesearch.js"></script>
-
-        <script>
-            window.onunload = function(){}; // force $(document).ready to be called on back/forward navigation in firefox
-            $(function() {
-                tipuesearch({
-                    'base_url': '<?php echo $base_url?>'
-                });
-            });
-        </script>
-    <?php } ?>
+    <?php $this->insert('theme::partials/search_script', ['page' => $page, 'base_url' => $base_url]); ?>
 
 </body>
 </html>
