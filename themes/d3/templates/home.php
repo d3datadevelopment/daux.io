@@ -97,7 +97,7 @@
             <ul class="HomepageFooter__links">
                 <li><a href="https://www.oxidmodule.com" target="_blank">Shop</a></li>
                 <li><a href="https://blog.oxidmodule.com" target="_blank">Blog</a></li>
-                <li><a href="https://faq.oxidmodule.com" target="_blank">FAQ</a></li>
+                <li><a href="https://faq.d3data.de" target="_blank">FAQ</a></li>
                 <li><a href="https://docs.oxidmodule.com" target="_blank">Dokumentationen</a></li>
                 <li><a href="https://support.oxidmodule.com" target="_blank">D³ Support Center</a></li>
                 <li><a href="https://www.oxidmodule.com/kontakt" target="_blank">Kontakt</a></li>
