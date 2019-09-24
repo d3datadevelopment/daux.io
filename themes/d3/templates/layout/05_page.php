@@ -63,7 +63,7 @@
                 <hr/>
                 <a href="https://www.oxidmodule.com" target="_blank">Shop</a><br />
                 <a href="https://blog.oxidmodule.com" target="_blank">Blog</a><br />
-                <a href="https://faq.oxidmodule.com" target="_blank">FAQ</a><br />
+                <a href="https://faq.d3data.de" target="_blank">FAQ</a><br />
                 <a href="https://docs.oxidmodule.com" target="_blank">Dokumentationen</a><br />
                 <a href="https://support.oxidmodule.com" target="_blank">D³ Support Center</a><br />
                 <a href="https://www.oxidmodule.com/kontakt" target="_blank">Kontakt</a><br />
