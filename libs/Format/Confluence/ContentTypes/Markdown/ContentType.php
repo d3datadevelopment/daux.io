@@ -1,12 +1,9 @@
 <?php namespace Todaymade\Daux\Format\Confluence\ContentTypes\Markdown;
 
-use Todaymade\Daux\Config;
-
 class ContentType extends \Todaymade\Daux\ContentTypes\Markdown\ContentType
 {
-    public function __construct(Config $config)
+    protected function createConverter()
     {
-        $this->config = $config;
-        $this->converter = new CommonMarkConverter(['daux' => $config]);
+        return new CommonMarkConverter(['daux' => $this->config]);
     }
 }

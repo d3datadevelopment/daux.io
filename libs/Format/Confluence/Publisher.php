@@ -8,16 +8,6 @@ class Publisher
     use RunAction;
 
     /**
-     * @var Api
-     */
-    protected $client;
-
-    /**
-     * @var array
-     */
-    protected $confluence;
-
-    /**
      * @var int terminal width
      */
     public $width;
@@ -28,14 +18,24 @@ class Publisher
     public $output;
 
     /**
+     * @var Api
+     */
+    protected $client;
+
+    /**
+     * @var Config
+     */
+    protected $confluence;
+
+    /**
      * @param $confluence
      */
-    public function __construct($confluence)
+    public function __construct(Config $confluence)
     {
         $this->confluence = $confluence;
 
-        $this->client = new Api($confluence['base_url'], $confluence['user'], $confluence['pass']);
-        $this->client->setSpace($confluence['space_id']);
+        $this->client = new Api($confluence->getBaseUrl(), $confluence->getUser(), $confluence->getPassword());
+        $this->client->setSpace($confluence->getSpaceId());
     }
 
     public function run($title, $closure)
@@ -62,24 +62,23 @@ class Publisher
         );
 
         $published = $this->run(
-            "Create placeholder pages...",
+            'Create placeholder pages...',
             function () use ($tree, $published) {
-                return $this->createRecursive($this->confluence['ancestor_id'], $tree, $published);
+                return $this->createRecursive($this->confluence->getAncestorId(), $tree, $published);
             }
         );
 
         $this->output->writeLn('Publishing updates...');
-        $published = $this->updateRecursive($this->confluence['ancestor_id'], $tree, $published);
+        $published = $this->updateRecursive($this->confluence->getAncestorId(), $tree, $published);
 
-        $shouldDelete = array_key_exists('delete', $this->confluence) && $this->confluence['delete'];
-        $delete = new PublisherDelete($this->output, $shouldDelete, $this->client);
+        $delete = new PublisherDelete($this->output, $this->confluence->shouldAutoDeleteOrphanedPages(), $this->client);
         $delete->handle($published);
     }
 
     protected function getRootPage($tree)
     {
-        if (array_key_exists('ancestor_id', $this->confluence)) {
-            $pages = $this->client->getList($this->confluence['ancestor_id']);
+        if ($this->confluence->hasAncestorId()) {
+            $pages = $this->client->getList($this->confluence->getAncestorId());
             foreach ($pages as $page) {
                 if ($page['title'] == $tree['title']) {
                     return $page;
@@ -87,9 +86,10 @@ class Publisher
             }
         }
 
-        if (array_key_exists('root_id', $this->confluence)) {
-            $published = $this->client->getPage($this->confluence['root_id']);
-            $this->confluence['ancestor_id'] = $published['ancestor_id'];
+        if ($this->confluence->hasRootId()) {
+            $published = $this->client->getPage($this->confluence->getRootId());
+            $this->confluence->setAncestorId($published['ancestor_id']);
+
             return $published;
         }
 
@@ -178,7 +178,7 @@ class Publisher
 
     protected function updatePage($parent_id, $entry, $published)
     {
-        $updateThreshold = array_key_exists('update_threshold', $this->confluence) ? $this->confluence['update_threshold'] : 2;
+        $updateThreshold = $this->confluence->getUpdateThreshold();
 
         $this->run(
             '- ' . PublisherUtilities::niceTitle($entry['file']->getUrl()),

@@ -1,13 +1,11 @@
 <?php namespace Todaymade\Daux\Console;
 
-use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Terminal;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Process\ProcessUtils;
 use Todaymade\Daux\Daux;
-use Todaymade\Daux\Server\Server;
 
 class Serve extends DauxCommand
 {
@@ -19,8 +17,6 @@ class Serve extends DauxCommand
             ->setName('serve')
             ->setDescription('Serve documentation')
 
-            // Serve the current documentation
-            ->addOption('serve', null, InputOption::VALUE_NONE, 'Serve the current directory')
             ->addOption('host', null, InputOption::VALUE_REQUIRED, 'The host to serve on', 'localhost')
             ->addOption('port', null, InputOption::VALUE_REQUIRED, 'The port to serve on', 8085);
     }
@@ -30,23 +26,44 @@ class Serve extends DauxCommand
         $host = $input->getOption('host');
         $port = $input->getOption('port');
 
-        $daux = $this->prepareDaux($input, $output);
+        $builder = $this->prepareConfig(Daux::LIVE_MODE, $input, $output);
 
         // Daux can only serve HTML
-        $daux->getParams()->setFormat('html');
+        $builder->withFormat('html');
+
+        $daux = new Daux($builder->build(), $output);
+
+        $width = (new Terminal())->getWidth();
+
+        // Instiantiate the processor if one is defined
+        $this->prepareProcessor($daux, $width);
+
+        // Write the current configuration to a file to read it from the other serving side
+        $file = tmpfile();
+
+        if ($file === false) {
+            $output->writeln('<fg=red>Failed to create temporary file for configuration</fg=red>');
+
+            return 1;
+        }
+
+        $path = stream_get_meta_data($file)['uri'];
+        fwrite($file, serialize($daux->getConfig()));
 
         chdir(__DIR__ . '/../../');
 
-        putenv('DAUX_SOURCE=' . $daux->getParams()->getDocumentationDirectory());
-        putenv('DAUX_THEME=' . $daux->getParams()->getThemesPath());
-        putenv('DAUX_CONFIGURATION=' . $daux->getParams()->getConfigurationOverrideFile());
+        putenv('DAUX_CONFIG=' . $path);
+        putenv('DAUX_VERBOSITY=' . $output->getVerbosity());
         putenv('DAUX_EXTENSION=' . DAUX_EXTENSION);
 
         $base = escapeshellarg(__DIR__ . '/../../');
-        $binary = escapeshellarg((new PhpExecutableFinder)->find(false));
+        $binary = escapeshellarg((new PhpExecutableFinder())->find(false));
 
         echo "Daux development server started on http://{$host}:{$port}/\n";
 
         passthru("{$binary} -S {$host}:{$port} {$base}/index.php");
+        fclose($file);
+
+        return 0;
     }
 }

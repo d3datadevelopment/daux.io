@@ -2,9 +2,8 @@
 namespace Todaymade\Daux\Tree;
 
 use org\bovigo\vfs\vfsStream;
-use Todaymade\Daux\Config;
-use Todaymade\Daux\Daux;
 use PHPUnit\Framework\TestCase;
+use Todaymade\Daux\ConfigBuilder;
 
 class BuilderTest extends TestCase
 {
@@ -36,6 +35,9 @@ class BuilderTest extends TestCase
 
     /**
      * @dataProvider providerRemoveSorting
+     *
+     * @param mixed $value
+     * @param mixed $expected
      */
     public function testRemoveSorting($value, $expected)
     {
@@ -44,8 +46,7 @@ class BuilderTest extends TestCase
 
     public function testGetOrCreateDirNew()
     {
-        $config = new Config;
-        $config->setDocumentationDirectory('');
+        $config = ConfigBuilder::withMode()->build();
         $root = new Root($config);
 
         $dir = Builder::getOrCreateDir($root, 'directory');
@@ -57,8 +58,7 @@ class BuilderTest extends TestCase
 
     public function testGetOrCreateDirExisting()
     {
-        $config = new Config;
-        $config->setDocumentationDirectory('');
+        $config = ConfigBuilder::withMode()->build();
         $root = new Root($config);
         $directory = new Directory($root, 'directory');
         $directory->setTitle('directory');
@@ -73,11 +73,9 @@ class BuilderTest extends TestCase
 
     public function getStaticRoot()
     {
-        $config = new Config();
-        $config->setDocumentationDirectory('');
-        $config['mode'] = Daux::STATIC_MODE;
-        $config['index_key'] = 'index.html';
-        $config['valid_content_extensions'] = ['md'];
+        $config = ConfigBuilder::withMode()
+            ->withValidContentExtensions(['md'])
+            ->build();
 
         return new Root($config);
     }
@@ -85,13 +83,20 @@ class BuilderTest extends TestCase
     public function providerCreatePage()
     {
         return [
+            // File, Url, Uri, Title
             ['A Page.md', 'dir/A_Page.html', 'A_Page.html', 'A Page'],
-            ['Page#1.md', 'dir/Page1.html', 'Page1.html', 'Page#1']
+            ['Page#1.md', 'dir/Page1.html', 'Page1.html', 'Page#1'],
+            ['你好世界.md', 'dir/ni_hao_shi_jie.html', 'ni_hao_shi_jie.html', '你好世界'],
         ];
     }
 
     /**
      * @dataProvider providerCreatePage
+     *
+     * @param mixed $file
+     * @param mixed $url
+     * @param mixed $uri
+     * @param mixed $title
      */
     public function testGetOrCreatePage($file, $url, $uri, $title)
     {
@@ -164,21 +169,21 @@ class BuilderTest extends TestCase
         $structure = [
             'Page.md' => 'another page',
             'Button.md' => 'another page',
-            '22.png' => ''
+            '你好世界.md' => 'another page',
+            '22.png' => '',
         ];
         $root = vfsStream::setup('root', null, $structure);
 
-        $config = new Config;
-        $config->setDocumentationDirectory($root->url());
-        $config['valid_content_extensions'] = ['md'];
-        $config['mode'] = Daux::STATIC_MODE;
-        $config['index_key'] = 'index.html';
+        $config = ConfigBuilder::withMode()
+            ->withDocumentationDirectory($root->url())
+            ->withValidContentExtensions(['md'])
+            ->build();
 
         $tree = new Root($config);
         Builder::build($tree, []);
 
         $this->assertEquals(
-            ['22.png', 'Button.html', 'Page.html'],
+            ['22.png', 'Button.html', 'Page.html', 'ni_hao_shi_jie.html'],
             array_keys($tree->getEntries())
         );
     }
@@ -189,16 +194,15 @@ class BuilderTest extends TestCase
             'folder' => [
                 'index.md' => "---\ntitle: new Title\n---\nThe content",
                 'Page.md' => 'another page',
-                'Button.md' => 'another page'
-            ]
+                'Button.md' => 'another page',
+            ],
         ];
         $root = vfsStream::setup('root', null, $structure);
 
-        $config = new Config;
-        $config->setDocumentationDirectory($root->url());
-        $config['valid_content_extensions'] = ['md'];
-        $config['mode'] = Daux::STATIC_MODE;
-        $config['index_key'] = 'index.html';
+        $config = ConfigBuilder::withMode()
+            ->withDocumentationDirectory($root->url())
+            ->withValidContentExtensions(['md'])
+            ->build();
 
         $tree = new Root($config);
         Builder::build($tree, []);

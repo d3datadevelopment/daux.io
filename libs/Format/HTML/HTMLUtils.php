@@ -2,7 +2,8 @@
 
 use Todaymade\Daux\GeneratorHelper;
 
-trait HTMLUtils {
+trait HTMLUtils
+{
     public function ensureEmptyDestination($destination)
     {
         if (is_dir($destination)) {
@@ -13,7 +14,7 @@ trait HTMLUtils {
     }
 
     /**
-     * Copy all files from $local to $destination
+     * Copy all files from $local to $destination.
      *
      * @param string $destination
      * @param string $local_base

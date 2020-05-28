@@ -4,8 +4,6 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Todaymade\Daux\ContentTypes\ContentTypeHandler;
 use Todaymade\Daux\Tree\Builder;
-use Todaymade\Daux\Tree\Content;
-use Todaymade\Daux\Tree\Directory;
 use Todaymade\Daux\Tree\Root;
 
 class Daux
@@ -15,8 +13,11 @@ class Daux
 
     public static $output;
 
-    /** @var string */
-    public $local_base;
+    /** @var Tree\Root */
+    public $tree;
+
+    /** @var Config */
+    public $config;
 
     /** @var \Todaymade\Daux\Format\Base\Generator */
     protected $generator;
@@ -24,182 +25,35 @@ class Daux
     /** @var ContentTypeHandler */
     protected $typeHandler;
 
-    /**
-     * @var string[]
-     */
+    /** @var string[] */
     protected $validExtensions;
 
     /** @var Processor */
     protected $processor;
 
-    /** @var Tree\Root */
-    public $tree;
-
-    /** @var Config */
-    public $options;
-
-    /** @var string */
-    private $mode;
-
     /** @var bool */
     private $merged_tree = false;
 
-    /**
-     * @param string $mode
-     */
-    public function __construct($mode, OutputInterface $output)
+    public function __construct(Config $config, OutputInterface $output)
     {
         Daux::$output = $output;
-        $this->mode = $mode;
 
-        $this->local_base = dirname(__DIR__);
-
-        // global.json
-        $this->loadBaseConfiguration();
+        $this->config = $config;
     }
 
     /**
-     * @param string $override_file
-     * @throws Exception
-     */
-    public function initializeConfiguration($override_file = null)
-    {
-        $params = $this->getParams();
-
-        // Validate and set theme path
-        $params->setDocumentationDirectory(
-            $docs_path = $this->normalizeDocumentationPath($this->getParams()->getDocumentationDirectory())
-        );
-
-        // Read documentation overrides
-        $this->loadConfiguration($docs_path . DIRECTORY_SEPARATOR . 'config.json');
-
-        // Read command line overrides
-        $override_file = $this->getConfigurationOverride($override_file);
-        if ($override_file !== null) {
-            $params->setConfigurationOverrideFile($override_file);
-            $this->loadConfiguration($override_file);
-        }
-
-        // Validate and set theme path
-        $params->setThemesPath($this->normalizeThemePath($params->getThemesDirectory()));
-
-        // Set a valid default timezone
-        if ($params->hasTimezone()) {
-            date_default_timezone_set($params->getTimezone());
-        } elseif (!ini_get('date.timezone')) {
-            date_default_timezone_set('GMT');
-        }
-    }
-
-    /**
-     * Get the file requested for configuration overrides
-     *
-     * @param string|null $path
-     * @return string|null the path to a file to load for configuration overrides
-     * @throws Exception
-     */
-    public function getConfigurationOverride($path)
-    {
-        $validPath = DauxHelper::findLocation($path, $this->local_base, 'DAUX_CONFIGURATION', 'file');
-
-        if ($validPath === null) {
-            return null;
-        }
-
-        if (!$validPath) {
-            throw new Exception('The configuration override file does not exist. Check the path again : ' . $path);
-        }
-
-        return $validPath;
-    }
-
-    public function normalizeThemePath($path)
-    {
-        $validPath = DauxHelper::findLocation($path, $this->local_base, 'DAUX_THEME', 'dir');
-
-        if (!$validPath) {
-            throw new Exception('The Themes directory does not exist. Check the path again : ' . $path);
-        }
-
-        return $validPath;
-
-    }
-
-    public function normalizeDocumentationPath($path)
-    {
-        $validPath = DauxHelper::findLocation($path, $this->local_base, 'DAUX_SOURCE', 'dir');
-
-        if (!$validPath) {
-            throw new Exception('The Docs directory does not exist. Check the path again : ' . $path);
-        }
-
-        return $validPath;
-    }
-
-    /**
-     * Load and validate the global configuration
-     *
-     * @throws Exception
-     */
-    protected function loadBaseConfiguration()
-    {
-        $this->options = new Config();
-
-        // Set the default configuration
-        $this->options->merge([
-            'docs_directory' => 'docs',
-            'valid_content_extensions' => ['md', 'markdown'],
-
-            //Paths and tree
-            'mode' => $this->mode,
-            'local_base' => $this->local_base,
-            'templates' => 'templates',
-
-            'index_key' => 'index.html',
-            'base_page' => '',
-            'base_url' => '',
-        ]);
-
-        // Load the global configuration
-        $this->loadConfiguration($this->local_base . DIRECTORY_SEPARATOR . 'global.json', false);
-    }
-
-    /**
-     * @param string $config_file
-     * @param bool $optional
-     * @throws Exception
-     */
-    protected function loadConfiguration($config_file, $optional = true)
-    {
-        if (!file_exists($config_file)) {
-            if ($optional) {
-                return;
-            }
-
-            throw new Exception('The configuration file is missing. Check path : ' . $config_file);
-        }
-
-        $config = json_decode(file_get_contents($config_file), true);
-        if (!isset($config)) {
-            throw new Exception('The configuration file "' . $config_file . '" is corrupt. Is your JSON well-formed ?');
-        }
-        $this->options->merge($config);
-    }
-
-    /**
-     * Generate the tree that will be used
+     * Generate the tree that will be used.
      */
     public function generateTree()
     {
-        $this->options['valid_content_extensions'] = $this->getContentExtensions();
+        $this->config->setValidContentExtensions($this->getContentExtensions());
 
-        $this->tree = new Root($this->getParams());
-        Builder::build($this->tree, $this->options['ignore']);
+        $this->tree = new Root($this->getConfig());
+        Builder::build($this->tree, $this->config->getIgnore());
 
         // Apply the language name as Section title
-        if ($this->options->isMultilanguage()) {
-            foreach ($this->options['languages'] as $key => $node) {
+        if ($this->config->isMultilanguage()) {
+            foreach ($this->config->getLanguages() as $key => $node) {
                 $this->tree->getEntries()[$key]->setTitle($node);
             }
         }
@@ -216,22 +70,35 @@ class Daux
     /**
      * @return Config
      */
-    public function getParams()
+    public function getConfig()
     {
         if ($this->tree && !$this->merged_tree) {
-            $this->options['tree'] = $this->tree;
-            $this->options['index'] = $this->tree->getIndexPage() ?: $this->tree->getFirstPage();
-            if ($this->options->isMultilanguage()) {
-                foreach ($this->options['languages'] as $key => $name) {
-                    $this->options['entry_page'][$key] = $this->tree->getEntries()[$key]->getFirstPage();
+            $this->config->setTree($this->tree);
+            $this->config->setIndex($this->tree->getIndexPage() ?: $this->tree->getFirstPage());
+            $entry_page = null;
+            if ($this->config->isMultilanguage()) {
+                $entry_page = [];
+                foreach ($this->config->getLanguages() as $key => $name) {
+                    $entry_page[$key] = $this->tree->getEntries()[$key]->getFirstPage();
                 }
             } else {
-                $this->options['entry_page'] = $this->tree->getFirstPage();
+                $entry_page = $this->tree->getFirstPage();
             }
+            $this->config->setEntryPage($entry_page);
             $this->merged_tree = true;
         }
 
-        return $this->options;
+        return $this->config;
+    }
+
+    /**
+     * @return Config
+     *
+     * @deprecated Use getConfig instead
+     */
+    public function getParams()
+    {
+        return $this->getConfig();
     }
 
     /**
@@ -246,17 +113,14 @@ class Daux
         return $this->processor;
     }
 
-    /**
-     * @param Processor $processor
-     */
     public function setProcessor(Processor $processor)
     {
         $this->processor = $processor;
 
         // This is not the cleanest but it's
-        // the best i've found to use the
+        // the best I've found to use the
         // processor in very remote places
-        $this->options['processor_instance'] = $processor;
+        $this->config->setProcessorInstance($processor);
     }
 
     public function getGenerators()
@@ -272,10 +136,9 @@ class Daux
         return array_replace($default, $extended);
     }
 
-
     public function getProcessorClass()
     {
-        $processor = $this->getParams()['processor'];
+        $processor = $this->getConfig()->getProcessor();
 
         if (empty($processor)) {
             return null;
@@ -293,7 +156,8 @@ class Daux
         return $class;
     }
 
-    protected function findAlternatives($input, $words) {
+    protected function findAlternatives($input, $words)
+    {
         $alternatives = [];
 
         foreach ($words as $word) {
@@ -318,7 +182,7 @@ class Daux
 
         $generators = $this->getGenerators();
 
-        $format = $this->getParams()->getFormat();
+        $format = $this->getConfig()->getFormat();
 
         if (!array_key_exists($format, $generators)) {
             $message = "The format '$format' doesn't exist, did you forget to set your processor ?";
@@ -365,7 +229,7 @@ class Daux
     }
 
     /**
-     * Get all content file extensions
+     * Get all content file extensions.
      *
      * @return string[]
      */
@@ -378,7 +242,8 @@ class Daux
         return $this->validExtensions = $this->getContentTypeHandler()->getContentExtensions();
     }
 
-    public static function getOutput() {
+    public static function getOutput()
+    {
         if (!Daux::$output) {
             Daux::$output = new NullOutput();
         }
@@ -389,25 +254,28 @@ class Daux
     /**
      * Writes a message to the output.
      *
-     * @param string|array $messages The message as an array of lines or a single string
+     * @param array|string $messages The message as an array of lines or a single string
      * @param bool         $newline  Whether to add a newline
      * @param int          $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
      */
-    public static function write($messages, $newline = false, $options = 0) {
+    public static function write($messages, $newline = false, $options = 0)
+    {
         Daux::getOutput()->write($messages, $newline, $options);
     }
 
     /**
      * Writes a message to the output and adds a newline at the end.
      *
-     * @param string|array $messages The message as an array of lines of a single string
+     * @param array|string $messages The message as an array of lines of a single string
      * @param int          $options  A bitmask of options (one of the OUTPUT or VERBOSITY constants), 0 is considered the same as self::OUTPUT_NORMAL | self::VERBOSITY_NORMAL
      */
-    public static function writeln($messages, $options = 0) {
+    public static function writeln($messages, $options = 0)
+    {
         Daux::getOutput()->write($messages, true, $options);
     }
 
-    public static function getVerbosity() {
+    public static function getVerbosity()
+    {
         return Daux::getOutput()->getVerbosity();
     }
 }

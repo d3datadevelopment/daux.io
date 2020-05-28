@@ -23,7 +23,6 @@ abstract class Entry
     protected $path;
 
     /**
-     * @param Directory $parent
      * @param string $uri
      * @param SplFileInfo $info
      */
@@ -81,15 +80,12 @@ abstract class Entry
     /**
      * @return string
      */
-    public function getTitle()
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    /**
-     * @param string $title
-     */
-    public function setTitle($title)
+    public function setTitle(string $title)
     {
         $this->title = $title;
     }
@@ -97,13 +93,13 @@ abstract class Entry
     /**
      * @return Directory
      */
-    public function getParent()
+    public function getParent(): ?Directory
     {
         return $this->parent;
     }
 
     /**
-     * Return all parents starting with the root
+     * Return all parents starting with the root.
      *
      * @return Directory[]
      */
@@ -118,9 +114,6 @@ abstract class Entry
         return $parents;
     }
 
-    /**
-     * @param Directory $parent
-     */
     protected function setParent(Directory $parent)
     {
         if ($this->parent) {
@@ -134,17 +127,15 @@ abstract class Entry
     /**
      * @return string
      */
-    public function getPath()
+    public function getPath(): ?string
     {
         return $this->path;
     }
 
     /**
-     * Get the path to the file from the root of the documentation
-     *
-     * @return string
+     * Get the path to the file from the root of the documentation.
      */
-    public function getRelativePath()
+    public function getRelativePath(): string
     {
         $root = $this;
         while ($root->getParent() != null) {
@@ -154,18 +145,12 @@ abstract class Entry
         return substr($this->path, strlen($root->getPath()) + 1);
     }
 
-    /**
-     * @return SplFileInfo
-     */
-    public function getFileinfo()
+    public function getFileinfo(): SplFileInfo
     {
         return $this->info;
     }
 
-    /**
-     * @return string
-     */
-    public function getUrl()
+    public function getUrl(): string
     {
         $url = '';
 
@@ -190,7 +175,8 @@ abstract class Entry
         ];
     }
 
-    public function isHotPath(Entry $node = null) {
+    public function isHotPath(Entry $node = null)
+    {
         return $this->parent->isHotPath($node ?: $this);
     }
 }

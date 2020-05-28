@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Terminal;
+use Todaymade\Daux\ConfigBuilder;
 use Todaymade\Daux\Daux;
 
 class Generate extends DauxCommand
@@ -25,8 +26,23 @@ class Generate extends DauxCommand
             // Confluence format only
             ->addOption('delete', null, InputOption::VALUE_NONE, 'Delete pages not linked to a documentation page (confluence)')
 
-            ->addOption('destination', 'd', InputOption::VALUE_REQUIRED, $description, 'static')
-            ->addOption('search', null, InputOption::VALUE_NONE, 'Generate full text search');
+            ->addOption('destination', 'd', InputOption::VALUE_REQUIRED, $description, 'static');
+    }
+
+    protected function prepareConfig($mode, InputInterface $input, OutputInterface $output): ConfigBuilder
+    {
+        $builder = parent::prepareConfig($mode, $input, $output);
+
+        // Set the format if requested
+        if ($input->hasOption('format') && $input->getOption('format')) {
+            $builder->withFormat($input->getOption('format'));
+        }
+
+        if ($input->hasOption('delete') && $input->getOption('delete')) {
+            $builder->withConfluenceDelete(true);
+        }
+
+        return $builder;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -42,29 +58,20 @@ class Generate extends DauxCommand
             $input = new ArgvInput($argv, $this->getDefinition());
         }
 
-        $daux = $this->prepareDaux($input, $output);
+        $builder = $this->prepareConfig(Daux::STATIC_MODE, $input, $output);
+        $daux = new Daux($builder->build(), $output);
 
-        $width = (new Terminal)->getWidth();
+        $width = (new Terminal())->getWidth();
 
         // Instiantiate the processor if one is defined
-        $this->prepareProcessor($daux, $input, $output, $width);
+        $this->prepareProcessor($daux, $width);
 
         // Generate the tree
         $daux->generateTree();
 
         // Generate the documentation
         $daux->getGenerator()->generateAll($input, $output, $width);
-    }
 
-    protected function prepareProcessor(Daux $daux, InputInterface $input, OutputInterface $output, $width)
-    {
-        if ($input->getOption('processor')) {
-            $daux->getParams()['processor'] = $input->getOption('processor');
-        }
-
-        $class = $daux->getProcessorClass();
-        if (!empty($class)) {
-            $daux->setProcessor(new $class($daux, $output, $width));
-        }
+        return 0;
     }
 }

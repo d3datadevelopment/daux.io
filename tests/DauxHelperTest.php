@@ -1,5 +1,4 @@
-<?php
-namespace Todaymade\Daux;
+<?php namespace Todaymade\Daux;
 
 use PHPUnit\Framework\TestCase;
 
@@ -17,11 +16,15 @@ class DauxHelperTest extends TestCase
 
     /**
      * @dataProvider providerGetFilenames
+     *
+     * @param mixed $expected
+     * @param mixed $node
      */
     public function testGetFilenames($expected, $node)
     {
-        $config = new Config();
-        $config['valid_content_extensions'] = ['md'];
+        $config = ConfigBuilder::withMode()
+            ->withValidContentExtensions(['md'])
+            ->build();
 
         $this->assertEquals($expected, DauxHelper::getFilenames($config, $node));
     }

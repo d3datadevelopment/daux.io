@@ -7,16 +7,20 @@ use League\CommonMark\Block\Element\ListBlock;
 use League\CommonMark\Block\Element\ListData;
 use League\CommonMark\Block\Element\ListItem;
 use League\CommonMark\Block\Element\Paragraph;
-use League\CommonMark\DocumentProcessorInterface;
+use League\CommonMark\Event\DocumentParsedEvent;
 use League\CommonMark\Inline\Element\Link;
 use League\CommonMark\Inline\Element\Text;
 use League\CommonMark\Node\Node;
 use ReflectionMethod;
 use Todaymade\Daux\Config;
 use Todaymade\Daux\ContentTypes\Markdown\TableOfContents;
+use Todaymade\Daux\DauxHelper;
 
-class Processor implements DocumentProcessorInterface
+class Processor
 {
+    /**
+     * @var Config
+     */
     protected $config;
 
     public function __construct(Config $config)
@@ -24,18 +28,9 @@ class Processor implements DocumentProcessorInterface
         $this->config = $config;
     }
 
-    public function hasAutoTOC()
+    public function onDocumentParsed(DocumentParsedEvent $event)
     {
-        return array_key_exists('html', $this->config) && array_key_exists('auto_toc', $this->config['html']) && $this->config['html']['auto_toc'];
-    }
-
-    /**
-     * @param Document $document
-     *
-     * @return void
-     */
-    public function processDocument(Document $document)
-    {
+        $document = $event->getDocument();
         /** @var TableOfContents[] $tocs */
         $tocs = [];
 
@@ -48,6 +43,7 @@ class Processor implements DocumentProcessorInterface
 
             if ($node instanceof TableOfContents && !$event->isEntering()) {
                 $tocs[] = $node;
+
                 continue;
             }
 
@@ -59,7 +55,7 @@ class Processor implements DocumentProcessorInterface
             $headings[] = new Entry($node);
         }
 
-        if (count($headings) && (count($tocs) || $this->hasAutoTOC())) {
+        if (count($headings) && (count($tocs) || $this->config->getHTML()->hasAutomaticTableOfContents())) {
             $generated = $this->generate($headings);
 
             if (count($tocs)) {
@@ -72,43 +68,27 @@ class Processor implements DocumentProcessorInterface
         }
     }
 
-    /**
-     * Get an escaped version of the link
-     * @param string $url
-     * @return string
-     */
-    protected function escaped($url) {
-        $url = trim($url);
-        $url = preg_replace('~[^\\pL0-9_]+~u', '-', $url);
-        $url = trim($url, "-");
-        $url = iconv("utf-8", "ASCII//TRANSLIT//IGNORE", $url);
-        $url = preg_replace('~[^-a-zA-Z0-9_]+~', '', $url);
-
-        return $url;
-    }
-
-    protected function getUniqueId(Document $document, $proposed) {
-        if ($proposed == "page_") {
-            $proposed = "page_section_" . (count($document->heading_ids) + 1);
+    protected function getUniqueId(Document $document, $proposed)
+    {
+        if ($proposed == 'page_') {
+            $proposed = 'page_section_' . (count($document->heading_ids) + 1);
         }
 
         // Quick path, it's a unique ID
         if (!in_array($proposed, $document->heading_ids)) {
             $document->heading_ids[] = $proposed;
+
             return $proposed;
         }
 
         $extension = 1; // Initialize the variable at one, so on the first iteration we have 2
         do {
-            $extension++;
+            ++$extension;
         } while (in_array("$proposed-$extension", $document->heading_ids));
 
         return "$proposed-$extension";
     }
 
-    /**
-     * @param Heading $node
-     */
     protected function ensureHeadingHasId(Document $document, Heading $node)
     {
         // If the node has an ID, no need to generate it, just check it's unique
@@ -139,13 +119,14 @@ class Processor implements DocumentProcessorInterface
             }
         }
 
-        $node->data['attributes']['id'] = $this->getUniqueId($document,'page_'. $this->escaped($text));
+        $node->data['attributes']['id'] = $this->getUniqueId($document, 'page_' . DauxHelper::slug($text));
     }
 
     /**
-     * Make a tree of the list of headings
+     * Make a tree of the list of headings.
      *
      * @param Entry[] $headings
+     *
      * @return RootEntry
      */
     public function generate($headings)
@@ -161,19 +142,21 @@ class Processor implements DocumentProcessorInterface
 
                 $parent->addChild($heading);
                 $previous = $heading;
+
                 continue;
             }
-
 
             if ($heading->getLevel() > $previous->getLevel()) {
                 $previous->addChild($heading);
                 $previous = $heading;
+
                 continue;
             }
 
             //if ($heading->getLevel() == $previous->getLevel()) {
             $previous->getParent()->addChild($heading);
             $previous = $heading;
+
             continue;
             //}
         }
@@ -183,6 +166,7 @@ class Processor implements DocumentProcessorInterface
 
     /**
      * @param Entry[] $entries
+     *
      * @return ListBlock
      */
     protected function render(array $entries)
@@ -234,7 +218,6 @@ class Processor implements DocumentProcessorInterface
     }
 
     /**
-     * @param Heading $node
      * @return Node[]
      */
     protected function cloneChildren(Heading $node)

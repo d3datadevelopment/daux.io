@@ -5,6 +5,11 @@ node_modules
 static
 
 /vendor
+/build
+.phpunit.result.cache
+.php_cs.cache
+coverage.clover
+test-report.xml
 
 /prettier.config.js
 /.eslintrc.js

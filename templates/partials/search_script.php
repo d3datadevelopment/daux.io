@@ -1,4 +1,9 @@
-<?php if ($params['html']['search']) { ?>
+<?php
+if (!isset($config)) {
+    $config = $params;
+}
+?>
+<?php if ($config->getHTML()->hasSearch()) { ?>
     <script>
         <?php
         $search_strings = [
@@ -13,7 +18,7 @@
             "Link_next",
         ];
         $search_translations = [];
-        foreach($search_strings as $key) {
+        foreach ($search_strings as $key) {
             $search_translations[$key] = $this->translate($key);
         }
         ?>

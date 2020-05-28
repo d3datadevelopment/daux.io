@@ -5,7 +5,7 @@ use RuntimeException;
 class GeneratorHelper
 {
     /**
-     * Remove a directory recursively
+     * Remove a directory recursively.
      *
      * @param string $dir
      */
@@ -26,7 +26,7 @@ class GeneratorHelper
     }
 
     /**
-     * Copy files recursively
+     * Copy files recursively.
      *
      * @param string $source
      * @param string $destination
@@ -39,7 +39,7 @@ class GeneratorHelper
 
         $dir = opendir($source);
 
-        if (!$dir) {
+        if ($dir === false) {
             throw new RuntimeException("Cannot copy '$source' to '$destination'");
         }
 

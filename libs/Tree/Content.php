@@ -24,8 +24,8 @@ class Content extends ContentAbstract
     {
         if ($this->manuallySetContent) {
             $content = $this->content;
-        } else if (!$this->getPath()) {
-            throw new RuntimeException("Empty content");
+        } elseif (!$this->getPath()) {
+            throw new RuntimeException('Empty content');
         } else {
             $content = file_get_contents($this->getPath());
         }
@@ -40,10 +40,7 @@ class Content extends ContentAbstract
         return $frontMatter->parse($content);
     }
 
-    /**
-     * @return string
-     */
-    public function getContent()
+    public function getContent(): string
     {
         if ($this->attributes === null) {
             $this->parseAttributes();
@@ -52,10 +49,7 @@ class Content extends ContentAbstract
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     */
-    public function setContent($content)
+    public function setContent(string $content): void
     {
         $this->manuallySetContent = true;
         $this->content = $content;
@@ -64,15 +58,12 @@ class Content extends ContentAbstract
     /**
      * @return Content
      */
-    public function getPrevious()
+    public function getPrevious(): ?Content
     {
         return $this->previous;
     }
 
-    /**
-     * @param Content $previous
-     */
-    public function setPrevious($previous)
+    public function setPrevious(Content $previous)
     {
         $this->previous = $previous;
     }
@@ -80,15 +71,12 @@ class Content extends ContentAbstract
     /**
      * @return Content
      */
-    public function getNext()
+    public function getNext(): ?Content
     {
         return $this->next;
     }
 
-    /**
-     * @param Content $next
-     */
-    public function setNext($next)
+    public function setNext(Content $next)
     {
         $this->next = $next;
     }
@@ -102,7 +90,7 @@ class Content extends ContentAbstract
         return $this->name == 'index' || $this->name == '_index';
     }
 
-    public function getTitle()
+    public function getTitle(): string
     {
         if ($title = $this->getAttribute('title')) {
             return $title;
@@ -130,10 +118,11 @@ class Content extends ContentAbstract
     }
 
     /**
-     * Get one or all attributes for the content
+     * Get one or all attributes for the content.
      *
-     * @param string|null $key
-     * @return array|mixed|null
+     * @param null|string $key
+     *
+     * @return null|array|mixed
      */
     public function getAttribute($key = null)
     {

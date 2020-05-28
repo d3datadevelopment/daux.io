@@ -5,10 +5,9 @@ use League\CommonMark\HtmlElement;
 
 abstract class CodeRenderer implements BlockRendererInterface
 {
-
     public function escapeCDATA($content)
     {
-        return str_replace("]]>", "]]]]><![CDATA[>", $content);
+        return str_replace(']]>', ']]]]><![CDATA[>', $content);
     }
 
     public function getHTMLElement($body, $language)

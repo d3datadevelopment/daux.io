@@ -14,7 +14,7 @@ class Builder
         '.DS_Store', 'Thumbs.db',
     ];
 
-    protected static function isIgnored(\SplFileInfo $file, $ignore)
+    protected static function isIgnored(SplFileInfo $file, $ignore)
     {
         $filename = $file->getFilename();
 
@@ -34,9 +34,10 @@ class Builder
     }
 
     /**
-     * Get name for a file
+     * Get name for a file.
      *
      * @param string $path
+     *
      * @return string
      */
     protected static function getName($path)
@@ -52,14 +53,16 @@ class Builder
     }
 
     /**
-     * Build the initial tree
+     * Build the initial tree.
      *
      * @param Directory $node
      * @param array $ignore
      */
     public static function build($node, $ignore)
     {
-        if (($it = new \FilesystemIterator($node->getPath())) == false) {
+        try {
+            $it = new \FilesystemIterator($node->getPath());
+        } catch (\UnexpectedValueException $e) {
             return;
         }
 
@@ -94,8 +97,6 @@ class Builder
     }
 
     /**
-     * @param Directory $parent
-     * @param SplFileInfo $file
      * @return Content|Raw
      */
     public static function createContent(Directory $parent, SplFileInfo $file)
@@ -104,7 +105,7 @@ class Builder
 
         $config = $parent->getConfig();
 
-        if (!in_array($file->getExtension(), $config['valid_content_extensions'])) {
+        if (!in_array($file->getExtension(), $config->getValidContentExtensions())) {
             $uri = $file->getFilename();
 
             $entry = new Raw($parent, $uri, $file);
@@ -122,7 +123,7 @@ class Builder
 
         $entry = new Content($parent, $uri, $file);
 
-        if ($entry->getUri() == $config['index_key']) {
+        if ($entry->getUri() == $config->getIndexKey()) {
             if ($parent instanceof Root) {
                 $entry->setTitle($config->getTitle());
             } else {
@@ -139,6 +140,7 @@ class Builder
 
     /**
      * @param string $filename
+     *
      * @return string
      */
     public static function removeSortingInformations($filename)
@@ -152,8 +154,8 @@ class Builder
     }
 
     /**
-     * @param Directory $parent
      * @param string $title
+     *
      * @return Directory
      */
     public static function getOrCreateDir(Directory $parent, $title)
@@ -171,8 +173,8 @@ class Builder
     }
 
     /**
-     * @param Directory $parent
      * @param string $path
+     *
      * @return ContentAbstract
      */
     public static function getOrCreatePage(Directory $parent, $path)
@@ -184,7 +186,7 @@ class Builder
             $path .= '.md';
         }
 
-        $raw = !in_array($extension, $parent->getConfig()['valid_content_extensions']);
+        $raw = !in_array($extension, $parent->getConfig()->getValidContentExtensions());
 
         $title = $uri = $path;
         if (!$raw) {
@@ -212,11 +214,10 @@ class Builder
     }
 
     /**
-     * Sort the tree recursively
-     *
-     * @param Directory $current
+     * Sort the tree recursively.
      */
-    public static function sortTree(Directory $current) {
+    public static function sortTree(Directory $current)
+    {
         $current->sort();
         foreach ($current->getEntries() as $entry) {
             if ($entry instanceof Directory) {
@@ -226,10 +227,10 @@ class Builder
     }
 
     /**
-     * Calculate next and previous for all pages
+     * Calculate next and previous for all pages.
      *
-     * @param Directory $current
      * @param null|Content $prev
+     *
      * @return null|Content
      */
     public static function finalizeTree(Directory $current, $prev = null)
@@ -249,5 +250,4 @@ class Builder
 
         return $prev;
     }
-
 }

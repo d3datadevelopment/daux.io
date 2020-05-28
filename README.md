@@ -1,51 +1,48 @@
 # Daux.io
 
-
 [![Latest Version](https://img.shields.io/github/release/dauxio/daux.io.svg?style=flat-square)](https://github.com/dauxio/daux.io/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/dauxio/daux.io/blob/master/LICENSE.md)
-[![Build Status](https://img.shields.io/travis/dauxio/daux.io/master.svg?style=flat-square)](https://travis-ci.org/dauxio/daux.io)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/dauxio/daux.io/CI?style=flat-square)
 [![Coverage Status](https://img.shields.io/scrutinizer/coverage/g/dauxio/daux.io.svg?style=flat-square)](https://scrutinizer-ci.com/g/dauxio/daux.io/code-structure)
 [![Quality Score](https://img.shields.io/scrutinizer/g/dauxio/daux.io.svg?style=flat-square)](https://scrutinizer-ci.com/g/dauxio/daux.io)
 [![Total Downloads](https://img.shields.io/packagist/dt/daux/daux.io.svg?style=flat-square)](https://packagist.org/packages/daux/daux.io)
-
 
 **Daux.io** is a documentation generator that uses a simple folder structure and Markdown files to create custom documentation on the fly. It helps you create great looking documentation in a developer friendly way.
 
 ## Features
 
-* 100% Mobile Responsive
-* CommonMark compliant (a Markdown specification)
-* Supports Markdown tables
-* Auto created homepage/landing page
-* Auto Syntax Highlighting
-* Auto Generated Navigation
-* 4 Built-In Themes or roll your own
-* Functional, Flat Design Style
-* Shareable/Linkable SEO Friendly URLs
-* Built On Bootstrap
-* No Build Step
-* Git/SVN Friendly
-* Supports Google Analytics and Piwik Analytics
-* Optional code float layout
-* Static Output Generation
+-   100% Mobile Responsive
+-   CommonMark compliant (a Markdown specification)
+-   Supports Markdown tables
+-   Auto created homepage/landing page
+-   Auto Syntax Highlighting
+-   Auto Generated Navigation
+-   4 Built-In Themes or roll your own
+-   Functional, Flat Design Style
+-   Shareable/Linkable SEO Friendly URLs
+-   Built On Bootstrap
+-   No Build Step
+-   Git/SVN Friendly
+-   Supports Google Analytics and Piwik Analytics
+-   Optional code float layout
+-   Static Output Generation
 
 ## Demos
 
 This is a list of sites using Daux.io:
 
-- With a custom theme:
-    * [Crafty](https://swissquote.github.io/crafty)	
-    * [Pixolution flow](https://docs.pixolution.org)
-	* [Soisy](https://doc.soisy.it/)
-    * [Vulkan Tutorial](https://vulkan-tutorial.com)
-	* [3Q](https://docs.3q.video/)
-- With the default Theme
-    * [Daux.io](https://daux.io/)
-	* [DoctrineWatcher](https://dsentker.github.io/WatcherDocumentation/)
-	* [DrupalGap](http://docs.drupalgap.org/8/)
-    * [ICADMIN: An admin panel powered by CodeIgniter.](http://istocode.com/shared/ic-admin/)
-    * [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
-    * [Nuntius: A PHP framework for bots](https://roysegall.github.io/nuntius-bot/)
+-   With a custom theme:
+    -   [Crafty](https://swissquote.github.io/crafty)
+    -   [Pixolution flow](https://docs.pixolution.org) \* [Soisy](https://doc.soisy.it/)
+    -   [Vulkan Tutorial](https://vulkan-tutorial.com) \* [3Q](https://docs.3q.video/)
+    -   [The Advanced RSS Environment](https://thearsse.com/manual/)
+-   With the default Theme
+    -   [Daux.io](https://daux.io/)
+        _ [DoctrineWatcher](https://dsentker.github.io/WatcherDocumentation/)
+        _ [DrupalGap](http://docs.drupalgap.org/8/)
+    -   [ICADMIN: An admin panel powered by CodeIgniter.](http://istocode.com/shared/ic-admin/)
+    -   [Munee: Standalone PHP 5.3 Asset Optimisation & Manipulation](http://mun.ee)
+    -   [Nuntius: A PHP framework for bots](https://roysegall.github.io/nuntius-bot/)
 
 Do you use Daux.io? Send me a pull request or open an [issue](https://github.com/dauxio/daux.io/issues) and I will add you to the list.
 
@@ -100,18 +97,18 @@ You must use underscores instead of spaces. Here are some example file names and
 
 **Good:**
 
-* 01_Getting_Started.md = Getting Started
-* API_Calls.md = API Calls
-* 200_Something_Else-Cool.md = Something Else-Cool
-* _5_Ways_to_Be_Happy.md = 5 Ways To Be Happy
+-   01_Getting_Started.md = Getting Started
+-   API_Calls.md = API Calls
+-   200_Something_Else-Cool.md = Something Else-Cool
+-   \_5_Ways_to_Be_Happy.md = 5 Ways To Be Happy
 
 **Bad:**
 
-* File Name With Space.md = FAIL
+-   File Name With Space.md = FAIL
 
 ## Sorting
 
-To sort your files and folders in a specific way, you can prefix them with a number and underscore, e.g. `/docs/01_Hello_World.md` and `/docs/05_Features.md` This will list *Hello World* before *Features*, overriding the default alpha-numeric sorting. The numbers will be stripped out of the navigation and urls. For the file `6 Ways to Get Rich`, you can use `/docs/_6_Ways_to_Get_Rich.md`
+To sort your files and folders in a specific way, you can prefix them with a number and underscore, e.g. `/docs/01_Hello_World.md` and `/docs/05_Features.md` This will list _Hello World_ before _Features_, overriding the default alpha-numeric sorting. The numbers will be stripped out of the navigation and urls. For the file `6 Ways to Get Rich`, you can use `/docs/_6_Ways_to_Get_Rich.md`
 
 ## Landing page
 
@@ -119,9 +116,9 @@ If you want to create a beautiful landing page for your project, simply create a
 
 ```json
 {
-	"title": "Daux.io",
-	"tagline": "The Easiest Way To Document Your Project",
-	"image": "app.png"
+    "title": "Daux.io",
+    "tagline": "The Easiest Way To Document Your Project",
+    "image": "app.png"
 }
 ```
 
@@ -137,42 +134,46 @@ To customize the look and feel of your documentation, you can create a `config.j
 The `config.json` file is a simple JSON object that you can use to change some of the basic settings of the documentation.
 
 ### Title
+
 Change the title bar in the docs
 
 ```json
 {
-	"title": "Daux.io"
+    "title": "Daux.io"
 }
 ```
 
 ### Themes
+
 We have 4 built-in Bootstrap themes. To use one of the themes, just set the `theme` option to one of the following:
 
-* daux-blue
-* daux-green
-* daux-navy
-* daux-red
+-   daux-blue
+-   daux-green
+-   daux-navy
+-   daux-red
 
 ```json
 {
-  "html": { "theme": "daux-green" }
+    "html": { "theme": "daux-green" }
 }
 ```
 
 ### More options
+
 Many other options are available:
-- [Global options](http://daux.io/Configuration/index)
-- [HTML Options](http://daux.io/Configuration/Html_export)
-- [Confluence options](http://daux.io/Configuration/Confluence_upload)
+
+-   [Global options](http://daux.io/Configuration/index)
+-   [HTML Options](http://daux.io/Configuration/Html_export)
+-   [Confluence options](http://daux.io/Configuration/Confluence_upload)
 
 ## Running Remotely
 
-Copy the files from the repo to a web server that can run PHP 5.4 or greater.
+Copy the files from the repo to a web server that can run PHP 7.2.0 or newer.
 
 ## Running Locally
 
 There are several ways to run the docs locally.
-The recommended way is to run `daux serve` which will execute PHP's embedded server. 
+The recommended way is to run `daux serve` which will execute PHP's embedded server.
 
 By default the server will run at: <a href="http://localhost:8085" target="_blank">http://localhost:8085</a>
 
@@ -192,8 +193,8 @@ daux --source=docs --destination=static
 
 If you have set up a local or remote IIS web site, you may need a `web.config` with:
 
-* A rewrite configuration, for handling clean urls.
-* A mime type handler for less files, if using a custom theme.
+-   A rewrite configuration, for handling clean urls.
+-   A mime type handler for less files, if using a custom theme.
 
 ### Clean URLs
 
@@ -201,45 +202,44 @@ The `web.config` needs an entry for `<rewrite>` under `<system.webServer>`:
 
 ```xml
 <configuration>
-	<system.webServer>
-		<rewrite>
-			<rules>
-				<rule name="Main Rule" stopProcessing="true">
-					<match url=".*" />
-					<conditions logicalGrouping="MatchAll">
-						<add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
-						<add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
-					</conditions>
-					<action type="Rewrite" url="index.php" appendQueryString="false" />
-				</rule>
-			</rules>
-		</rewrite>
-	</system.webServer>
+    <system.webServer>
+        <rewrite>
+            <rules>
+                <rule name="Main Rule" stopProcessing="true">
+                    <match url=".*" />
+                    <conditions logicalGrouping="MatchAll">
+                        <add
+                            input="{REQUEST_FILENAME}"
+                            matchType="IsFile"
+                            negate="true"
+                        />
+                        <add
+                            input="{REQUEST_FILENAME}"
+                            matchType="IsDirectory"
+                            negate="true"
+                        />
+                    </conditions>
+                    <action
+                        type="Rewrite"
+                        url="index.php"
+                        appendQueryString="false"
+                    />
+                </rule>
+            </rules>
+        </rewrite>
+    </system.webServer>
 </configuration>
 ```
 
 To use clean URLs on IIS 6, you will need to use a custom URL rewrite module, such as [URL Rewriter](http://urlrewriter.net/).
 
-## Docker
-
-A docker configuration is also provided to run daux within a container, you can either run daux with php5 or php7.
-
-```
-cd docker
-docker-compose -f docker-compose.7.yml up -d
-```
-
-You can then point your browser to http://localhost:8086
-
 ## PHP Requirements
 
-Daux.io is compatible with PHP 7.1.3 and up.
-
-The reason is because some dependencies we have (mainly Symfony and Guzzle) do not support PHP 5.6 anymore.
+Daux.io is compatible with the [officially supported](https://www.php.net/supported-versions.php) PHP versions; 7.2.0 and up.
 
 ### Extensions
 
-PHP Needs the following extension to work : `php-mbstring` and `php-xml`.
+Daux.io needs the following PHP extensions to work : `php-mbstring` and `php-xml`.
 
 If you encounter an error similar to `utf8_decode() not found` this means that you're missing the `php-xml` package.
 

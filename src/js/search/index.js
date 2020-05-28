@@ -23,6 +23,7 @@ class SearchEngine {
     constructor(options) {
         this.settings = {
             field: document.getElementById("search_input"),
+            form: document.getElementById("search_form"),
             show: 10,
             showURL: true,
             showTitleCount: true,
@@ -30,7 +31,7 @@ class SearchEngine {
             descriptiveWords: 25,
             highlightTerms: true,
             highlightEveryTerm: false,
-            contentLocation: "daux_search_index.json",
+            contentLocation: "daux_search_index.js",
             ...options
         };
 
@@ -41,30 +42,37 @@ class SearchEngine {
 
     loadData() {
         if (!this.loadingPromise) {
-            this.loadingPromise = fetch(
-                this.settings.base_url + this.settings.contentLocation
-            )
-                .then(data => data.json())
-                .then(json => {
-                    this.searchIndex = new FlexSearch({
-                        doc: {
-                            id: "url",
-                            field: ["title", "text", "tags"]
-                        }
-                    });
+            // We do this as jsonp instead of an XHR or fetch request
+            // to be compatible with usage from filesystem
+            const po = document.createElement("script");
+            po.type = "text/javascript";
+            po.async = true;
+            po.src = this.settings.base_url + this.settings.contentLocation;
+            const s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(po, s);
 
-                    let pages = json.pages;
-
-                    // Only keep the pages related to the current language
-                    if (window.searchLanguage) {
-                        const pagePrefix = `${window.searchLanguage}/`;
-                        pages = pages.filter(
-                            item => item.url.indexOf(pagePrefix) === 0
-                        );
+            this.loadingPromise = new Promise(resolve => {
+                window.load_search_index = data => resolve(data);
+            }).then(json => {
+                this.searchIndex = new FlexSearch({
+                    doc: {
+                        id: "url",
+                        field: ["title", "text", "tags"]
                     }
-
-                    this.searchIndex.add(pages);
                 });
+
+                let pages = json.pages;
+
+                // Only keep the pages related to the current language
+                if (window.searchLanguage) {
+                    const pagePrefix = `${window.searchLanguage}/`;
+                    pages = pages.filter(
+                        item => item.url.indexOf(pagePrefix) === 0
+                    );
+                }
+
+                this.searchIndex.add(pages);
+            });
         }
 
         return this.loadingPromise;
@@ -88,6 +96,13 @@ class SearchEngine {
                     this.displaySearch();
                 });
             }
+        });
+
+        this.settings.form.addEventListener("submit", event => {
+            event.preventDefault();
+            this.loadData().then(() => {
+                this.displaySearch();
+            });
         });
     }
 

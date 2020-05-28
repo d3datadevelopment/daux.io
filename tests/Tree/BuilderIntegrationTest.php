@@ -3,9 +3,8 @@ namespace Todaymade\Daux\Tree;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
-use Todaymade\Daux\Config;
-use Todaymade\Daux\Daux;
 use PHPUnit\Framework\TestCase;
+use Todaymade\Daux\ConfigBuilder;
 
 class BuilderIntegrationTest extends TestCase
 {
@@ -14,7 +13,7 @@ class BuilderIntegrationTest extends TestCase
      */
     private $root;
 
-    public function setUp()
+    public function setUp(): void
     {
         $structure = [
             'Contents' => [
@@ -30,11 +29,10 @@ class BuilderIntegrationTest extends TestCase
 
     public function testCreateHierarchy()
     {
-        $config = new Config();
-        $config->setDocumentationDirectory($this->root->url());
-        $config['valid_content_extensions'] = ['md'];
-        $config['mode'] = Daux::STATIC_MODE;
-        $config['index_key'] = 'index.html';
+        $config = ConfigBuilder::withMode()
+            ->withDocumentationDirectory($this->root->url())
+            ->withValidContentExtensions(['md'])
+            ->build();
 
         $tree = new Root($config);
         Builder::build($tree, []);

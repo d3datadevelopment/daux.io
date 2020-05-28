@@ -5,7 +5,8 @@ use Todaymade\Daux\Daux;
 
 trait RunAction
 {
-    protected function getLength($content) {
+    protected function getLength($content)
+    {
         return function_exists('mb_strlen') ? mb_strlen($content) : strlen($content);
     }
 
@@ -25,6 +26,7 @@ trait RunAction
             });
         } catch (\Exception $e) {
             $this->status($padding, '[ <fg=red>FAIL</fg=red> ]');
+
             throw $e;
         }
         $this->status($padding, '[  <fg=green>OK</fg=green>  ]');

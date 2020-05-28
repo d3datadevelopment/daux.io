@@ -35,7 +35,7 @@ Components
     display: inline-block;
     text-align: center;
     vertical-align: middle;
-    touch-action: manipulation;
+    touch-action: manipulation; // stylelint-disable-line plugin/no-unsupported-browser-features
     cursor: pointer;
     background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
     border: 1px solid transparent;
@@ -99,7 +99,8 @@ Components
 }
 
 /* stylelint-disable-next-line selector-class-pattern */
-.no-js .CodeToggler {
+.no-js .CodeToggler,
+.CodeToggler--hidden {
     display: none;
 }
 
@@ -249,7 +250,6 @@ Components
 
         display: inline-block;
         vertical-align: top;
-        zoom: 1;
 
         position: relative;
         height: 20px;
@@ -264,7 +264,6 @@ Components
         .Twitter__button__label {
             display: inline-block;
             vertical-align: top;
-            zoom: 1;
 
             margin-left: 3px;
             white-space: nowrap;
@@ -301,7 +300,7 @@ Components
 
         &:focus {
             border-color: var(--search-field-hover-border-color);
-            outline: 0;
+            outline: 0; // stylelint-disable-line plugin/no-unsupported-browser-features
         }
     }
 
@@ -311,6 +310,7 @@ Components
         top: 9px;
         width: 16px;
         height: 16px;
+        cursor: pointer;
     }
 }
 
@@ -476,8 +476,4 @@ ul.TableOfContents {
     .Checkbox input:disabled ~ &:after {
         border-color: var(--checkbox-disabled-tick-color);
     }
-}
-
-.Hidden {
-    display: none;
 }

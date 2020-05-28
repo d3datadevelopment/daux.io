@@ -11,7 +11,7 @@ class Root extends Directory
     protected $activeNode;
 
     /**
-     * The root doesn't have a parent
+     * The root doesn't have a parent.
      */
     public function __construct(Config $config)
     {
@@ -21,23 +21,18 @@ class Root extends Directory
         $this->path = $config->getDocumentationDirectory();
     }
 
-    /**
-     * @return Config
-     */
-    public function getConfig()
+    public function getConfig(): Config
     {
         return $this->config;
     }
 
-    /**
-     * @param Config $config
-     */
-    public function setConfig($config)
+    public function setConfig(Config $config)
     {
         $this->config = $config;
     }
 
-    public function isHotPath(Entry $node = null) {
+    public function isHotPath(Entry $node = null): bool
+    {
         if ($node == null) {
             return true;
         }
@@ -51,7 +46,7 @@ class Root extends Directory
         }
 
         foreach ($this->activeNode->getParents() as $parent) {
-            if ($node == $parent) {
+            if ($node === $parent) {
                 return true;
             }
         }
@@ -59,7 +54,8 @@ class Root extends Directory
         return false;
     }
 
-    public function setActiveNode(Entry $node) {
+    public function setActiveNode(Entry $node)
+    {
         $this->activeNode = $node;
     }
 }

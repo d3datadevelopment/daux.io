@@ -1,16 +1,14 @@
 <?php namespace Todaymade\Daux;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Todaymade\Daux\Daux;
 
 class Cache
 {
+    public static $printed = false;
 
-    static $printed = false;
-
-    public static function getDirectory()
+    public static function getDirectory(): string
     {
-        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "dauxio" . DIRECTORY_SEPARATOR;
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'dauxio' . DIRECTORY_SEPARATOR;
 
         if (!Cache::$printed) {
             Cache::$printed = true;
@@ -22,12 +20,8 @@ class Cache
 
     /**
      * Store an item in the cache for a given number of minutes.
-     *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
      */
-    public static function put($key, $value)
+    public static function put(string $key, string $value): void
     {
         Cache::ensureCacheDirectoryExists($path = Cache::path($key));
         file_put_contents($path, $value);
@@ -35,11 +29,8 @@ class Cache
 
     /**
      * Create the file cache directory if necessary.
-     *
-     * @param  string  $path
-     * @return void
      */
-    protected static function ensureCacheDirectoryExists($path)
+    protected static function ensureCacheDirectoryExists(string $path): void
     {
         $parent = dirname($path);
 
@@ -50,11 +41,8 @@ class Cache
 
     /**
      * Remove an item from the cache.
-     *
-     * @param  string  $key
-     * @return bool
      */
-    public static function forget($key)
+    public static function forget(string $key): bool
     {
         $path = Cache::path($key);
 
@@ -68,10 +56,9 @@ class Cache
     /**
      * Retrieve an item from the cache by key.
      *
-     * @param  string|array  $key
      * @return mixed
      */
-    public static function get($key)
+    public static function get(string $key): ?string
     {
         $path = Cache::path($key);
 
@@ -84,33 +71,30 @@ class Cache
 
     /**
      * Get the full path for the given cache key.
-     *
-     * @param  string  $key
-     * @return string
      */
-    protected static function path($key)
+    protected static function path(string $key): string
     {
         $parts = array_slice(str_split($hash = sha1($key), 2), 0, 2);
+
         return Cache::getDirectory() . '/' . implode('/', $parts) . '/' . $hash;
     }
 
-    public static function clear()
+    public static function clear(): void
     {
         Cache::rrmdir(Cache::getDirectory());
     }
 
-    protected static function rrmdir($dir)
+    protected static function rrmdir(string $dir): void
     {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (is_dir($dir . "/" . $object)) {
-                        Cache::rrmdir($dir . "/" . $object);
+                if ($object != '.' && $object != '..') {
+                    if (is_dir($dir . '/' . $object)) {
+                        Cache::rrmdir($dir . '/' . $object);
                     } else {
-                        unlink($dir . "/" . $object);
+                        unlink($dir . '/' . $object);
                     }
-
                 }
             }
             rmdir($dir);

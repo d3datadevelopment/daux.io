@@ -3,7 +3,7 @@
  * Created by IntelliJ IDEA.
  * User: onigoetz
  * Date: 06/11/15
- * Time: 20:27
+ * Time: 20:27.
  */
 namespace Todaymade\Daux\Format\Base;
 
@@ -25,7 +25,7 @@ class EmbedImages
     {
         return preg_replace_callback(
             "/<img\\s+[^>]*src=['\"]([^\"]*)['\"][^>]*>/",
-            function($matches) use ($file, $callback) {
+            function ($matches) use ($file, $callback) {
                 if ($result = $this->findImage($matches[1], $matches[0], $file, $callback)) {
                     return $result;
                 }
@@ -66,7 +66,6 @@ class EmbedImages
 
         //Get any file corresponding to the right one
         $file = DauxHelper::getFile($this->tree, $url);
-
 
         if ($file === false) {
             return false;

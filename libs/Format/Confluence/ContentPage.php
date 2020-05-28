@@ -15,17 +15,16 @@ class ContentPage extends \Todaymade\Daux\Format\Base\ContentPage
 
         //Embed images
         // We do it after generation so we can catch the images that were in html already
-        $content = (new EmbedImages($this->params['tree']))
+        $content = (new EmbedImages($this->config->getTree()))
             ->embed(
                 $content,
                 $this->file,
-                function($src, array $attributes, Entry $file) {
-
+                function ($src, array $attributes, Entry $file) {
                     //Add the attachment for later upload
                     if ($file instanceof Raw) {
                         $filename = basename($file->getPath());
                         $this->attachments[$filename] = ['filename' => $filename, 'file' => $file];
-                    } else if ($file instanceof ComputedRaw) {
+                    } elseif ($file instanceof ComputedRaw) {
                         $filename = $file->getUri();
                         $this->attachments[$filename] = ['filename' => $filename, 'content' => $file->getContent()];
                     } else {
@@ -36,20 +35,20 @@ class ContentPage extends \Todaymade\Daux\Format\Base\ContentPage
                 }
             );
 
-
         $intro = '';
-        if (array_key_exists('confluence', $this->params) && array_key_exists('header', $this->params['confluence']) && !empty($this->params['confluence']['header'])) {
-            $intro = '<ac:structured-macro ac:name="info"><ac:rich-text-body>' . $this->params['confluence']['header'] . '</ac:rich-text-body></ac:structured-macro>';
+        if ($this->config->getConfluenceConfiguration()->hasHeader()) {
+            $intro = '<ac:structured-macro ac:name="info"><ac:rich-text-body>' . $this->config->getConfluenceConfiguration()->getHeader() . '</ac:rich-text-body></ac:structured-macro>';
         }
 
         return $intro . $content;
     }
 
     /**
-     * Create an image tag for the specified filename
+     * Create an image tag for the specified filename.
      *
      * @param string $filename
      * @param array $attributes
+     *
      * @return string
      */
     private function createImageTag($filename, $attributes)
@@ -61,7 +60,7 @@ class ContentPage extends \Todaymade\Daux\Format\Base\ContentPage
                 $re = '/float:\s*?(left|right);?/';
                 if (preg_match($re, $value, $matches)) {
                     $img .= ' ac:align="' . $matches[1] . '"';
-                    $value = preg_replace($re, "", $value, 1);
+                    $value = preg_replace($re, '', $value, 1);
                 }
             }
 

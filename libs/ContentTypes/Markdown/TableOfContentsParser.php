@@ -1,18 +1,12 @@
 <?php namespace Todaymade\Daux\ContentTypes\Markdown;
 
-use League\CommonMark\Block\Parser\AbstractBlockParser;
+use League\CommonMark\Block\Parser\BlockParserInterface;
 use League\CommonMark\ContextInterface;
 use League\CommonMark\Cursor;
 
-class TableOfContentsParser extends AbstractBlockParser
+class TableOfContentsParser implements BlockParserInterface
 {
-    /**
-     * @param ContextInterface $context
-     * @param Cursor $cursor
-     *
-     * @return bool
-     */
-    public function parse(ContextInterface $context, Cursor $cursor)
+    public function parse(ContextInterface $context, Cursor $cursor): bool
     {
         if ($cursor->isIndented()) {
             return false;

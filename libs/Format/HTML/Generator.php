@@ -2,7 +2,7 @@
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Todaymade\Daux\Config;
+use Todaymade\Daux\Config as GlobalConfig;
 use Todaymade\Daux\Console\RunAction;
 use Todaymade\Daux\Daux;
 use Todaymade\Daux\DauxHelper;
@@ -16,23 +16,24 @@ use Todaymade\Daux\Tree\Raw;
 
 class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
 {
-    use RunAction, HTMLUtils;
+    use RunAction;
+    use HTMLUtils;
 
     /** @var Daux */
     protected $daux;
 
+    /** @var Template */
+    protected $templateRenderer;
+
     protected $indexed_pages = [];
 
-    /**
-     * @param Daux $daux
-     */
     public function __construct(Daux $daux)
     {
-        $params = $daux->getParams();
+        $config = $daux->getConfig();
 
         $this->daux = $daux;
-        $this->templateRenderer = new Template($params);
-        $params->templateRenderer = $this->templateRenderer;
+        $this->templateRenderer = new Template($config);
+        $config->templateRenderer = $this->templateRenderer;
     }
 
     /**
@@ -41,7 +42,7 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
     public function getContentTypes()
     {
         return [
-            'markdown' => new ContentType($this->daux->getParams()),
+            'markdown' => new ContentType($this->daux->getConfig()),
         ];
     }
 
@@ -49,38 +50,34 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
     {
         $destination = $input->getOption('destination');
 
-        $params = $this->daux->getParams();
+        $config = $this->daux->getConfig();
         if (is_null($destination)) {
-            $destination = $this->daux->local_base . DIRECTORY_SEPARATOR . 'static';
+            $destination = $config->getLocalBase() . DIRECTORY_SEPARATOR . 'static';
         }
 
         $this->runAction(
             'Copying Static assets ...',
             $width,
-            function() use ($destination, $params) {
+            function () use ($destination, $config) {
                 $this->ensureEmptyDestination($destination);
 
-                $this->copyThemes($destination, $params->getThemesPath());
+                $this->copyThemes($destination, $config->getThemesPath());
             }
         );
 
         $output->writeLn('Generating ...');
 
-        if (!array_key_exists('search', $params['html']) || !$params['html']['search']) {
-            $params['html']['search'] = $input->getOption('search');
-        }
-
-        $this->generateRecursive($this->daux->tree, $destination, $params, $output, $width, $params['html']['search']);
+        $this->generateRecursive($this->daux->tree, $destination, $config, $output, $width, $config->getHTML()->hasSearch());
 
         GeneratorHelper::copyRecursive(
-            $this->daux->local_base . DIRECTORY_SEPARATOR . 'daux_libraries' . DIRECTORY_SEPARATOR,
+            $config->getLocalBase() . DIRECTORY_SEPARATOR . 'daux_libraries' . DIRECTORY_SEPARATOR,
             $destination . DIRECTORY_SEPARATOR . 'daux_libraries'
         );
 
-        if ($params['html']['search']) {
+        if ($config->getHTML()->hasSearch()) {
             file_put_contents(
-                $destination . DIRECTORY_SEPARATOR . 'daux_search_index.json',
-                json_encode(['pages' => $this->indexed_pages])
+                $destination . DIRECTORY_SEPARATOR . 'daux_search_index.js',
+                'load_search_index(' . json_encode(['pages' => $this->indexed_pages]) . ');'
             );
 
             if (json_last_error()) {
@@ -94,9 +91,10 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
      * script code, and embedded objects.  Add line breaks around
      * block-level tags to prevent word joining after tag removal.
      * Also collapse whitespace to single space and trim result.
-     * modified from: http://nadeausoftware.com/articles/2007/09/php_tip_how_strip_html_tags_web_page
+     * modified from: http://nadeausoftware.com/articles/2007/09/php_tip_how_strip_html_tags_web_page.
      *
      * @param string $text
+     *
      * @return string
      */
     private function sanitize($text)
@@ -134,44 +132,41 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
 
         // Sometimes strings are detected as invalid UTF-8 and json_encode can't treat them
         // iconv can fix those strings
-        $text = iconv('UTF-8', 'UTF-8//IGNORE', $text);
-
-        return $text;
+        return iconv('UTF-8', 'UTF-8//IGNORE', $text);
     }
 
     /**
-     * Recursively generate the documentation
+     * Recursively generate the documentation.
      *
-     * @param Directory $tree
      * @param string $output_dir
-     * @param \Todaymade\Daux\Config $params
      * @param OutputInterface $output
      * @param int $width
      * @param bool $index_pages
      * @param string $base_url
+     *
      * @throws \Exception
      */
-    private function generateRecursive(Directory $tree, $output_dir, $params, $output, $width, $index_pages, $base_url = '')
+    private function generateRecursive(Directory $tree, $output_dir, GlobalConfig $config, $output, $width, $index_pages, $base_url = '')
     {
-        DauxHelper::rebaseConfiguration($params, $base_url);
+        DauxHelper::rebaseConfiguration($config, $base_url);
 
-        if ($base_url !== '' && empty($params['entry_page'])) {
-            $params['entry_page'] = $tree->getFirstPage();
+        if ($base_url !== '' && !$config->hasEntryPage()) {
+            $config->setEntryPage($tree->getFirstPage());
         }
 
         foreach ($tree->getEntries() as $key => $node) {
             if ($node instanceof Directory) {
                 $new_output_dir = $output_dir . DIRECTORY_SEPARATOR . $key;
                 mkdir($new_output_dir);
-                $this->generateRecursive($node, $new_output_dir, $params, $output, $width, $index_pages, '../' . $base_url);
+                $this->generateRecursive($node, $new_output_dir, $config, $output, $width, $index_pages, '../' . $base_url);
 
-                // Rebase configuration again as $params is a shared object
-                DauxHelper::rebaseConfiguration($params, $base_url);
+                // Rebase configuration again as $config is a shared object
+                DauxHelper::rebaseConfiguration($config, $base_url);
             } else {
                 $this->runAction(
                     '- ' . $node->getUrl(),
                     $width,
-                    function() use ($node, $output_dir, $key, $params, $index_pages) {
+                    function () use ($node, $output_dir, $key, $config, $index_pages) {
                         if ($node instanceof Raw) {
                             copy($node->getPath(), $output_dir . DIRECTORY_SEPARATOR . $key);
 
@@ -180,13 +175,13 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
 
                         $this->daux->tree->setActiveNode($node);
 
-                        $generated = $this->generateOne($node, $params);
+                        $generated = $this->generateOne($node, $config);
                         file_put_contents($output_dir . DIRECTORY_SEPARATOR . $key, $generated->getContent());
                         if ($index_pages) {
                             $this->indexed_pages[] = [
                                 'title' => $node->getTitle(),
                                 'text' => $this->sanitize($generated->getPureContent()),
-                                'tags' =>  '',
+                                'tags' => '',
                                 'url' => $node->getUrl(),
                             ];
                         }
@@ -197,11 +192,9 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
     }
 
     /**
-     * @param Entry $node
-     * @param Config $params
      * @return \Todaymade\Daux\Format\Base\Page
      */
-    public function generateOne(Entry $node, Config $params)
+    public function generateOne(Entry $node, GlobalConfig $config)
     {
         if ($node instanceof Raw) {
             return new RawPage($node->getPath());
@@ -211,9 +204,9 @@ class Generator implements \Todaymade\Daux\Format\Base\Generator, LiveGenerator
             return new ComputedRawPage($node);
         }
 
-        $params['request'] = $node->getUrl();
+        $config->setRequest($node->getUrl());
 
-        $contentPage = ContentPage::fromFile($node, $params, $this->daux->getContentTypeHandler()->getType($node));
+        $contentPage = ContentPage::fromFile($node, $config, $this->daux->getContentTypeHandler()->getType($node));
         $contentPage->templateRenderer = $this->templateRenderer;
 
         return $contentPage;

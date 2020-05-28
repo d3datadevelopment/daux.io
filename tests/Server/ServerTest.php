@@ -1,31 +1,31 @@
 <?php namespace Todaymade\Daux\Server;
 
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\Request;
-use Todaymade\Daux\Format\HTML\RawPage;
-use Todaymade\Daux\Config;
+use Todaymade\Daux\ConfigBuilder;
 use Todaymade\Daux\Daux;
-use Todaymade\Daux\Server\Server;
-use org\bovigo\vfs\vfsStream;
+use Todaymade\Daux\Format\HTML\RawPage;
 
 class ServerTest extends TestCase
 {
-    function testCreateResponse() {
-
+    public function testCreateResponse()
+    {
         $structure = [
             'index.md' => 'first page',
             'Page.md' => 'another page',
             'somefile.css' => 'body {}',
-            '22.png' => ''
+            '22.png' => '',
         ];
         $root = vfsStream::setup('root', null, $structure);
 
-        $daux = new Daux(Daux::LIVE_MODE, new NullOutput());
-        $daux->getParams()->setDocumentationDirectory($root->url());
+        $config = ConfigBuilder::withMode(Daux::LIVE_MODE)
+            ->withDocumentationDirectory($root->url())
+            ->build();
 
-        $daux->initializeConfiguration();
-        $daux->getParams()['index_key'] = 'index';
+        $daux = new Daux($config, new NullOutput());
+
         $daux->generateTree();
 
         $page = new RawPage($daux->tree['somefile.css']->getPath());
@@ -33,7 +33,6 @@ class ServerTest extends TestCase
         $server = new Server($daux);
         $response = $server->createResponse($page)->prepare(Request::createFromGlobals());
 
-        $this->assertEquals("text/css", $response->headers->get('Content-Type'));
+        $this->assertEquals('text/css', $response->headers->get('Content-Type'));
     }
 }
-

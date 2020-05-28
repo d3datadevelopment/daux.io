@@ -4,13 +4,14 @@ use IntlDateFormatter;
 
 class FormatDate
 {
-    public static function format($params, $date) {
-        $locale = $params['language'];
+    public static function format($config, $date)
+    {
+        $locale = $config->getLanguage();
         $datetype = IntlDateFormatter::LONG;
         $timetype = IntlDateFormatter::SHORT;
         $timezone = null;
 
-        if (!extension_loaded("intl")) {
+        if (!extension_loaded('intl')) {
             $locale = 'en';
             $timezone = 'GMT';
         }

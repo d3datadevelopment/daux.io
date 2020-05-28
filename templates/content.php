@@ -3,13 +3,13 @@
 
     <div class="Page__header">
         <h1><?= $page['breadcrumbs'] ? $this->get_breadcrumb_title($page, $base_page) : $page['title'] ?></h1>
-        <?php if ($params['html']['date_modified']) { ?>
+        <?php if ($config->getHTML()->showDateModified()) { ?>
         <span class="ModifiedDate">
-            <?= Todaymade\Daux\FormatDate::format($params, $page['modified_time']) ?>
+            <?= Todaymade\Daux\FormatDate::format($config, $page['modified_time']) ?>
         </span>
         <?php } ?>
         <?php
-        $edit_on = $params->getHTML()->getEditOn();
+        $edit_on = $config->getHTML()->getEditOn();
         if ($edit_on) { ?>
         <span class="EditOn">
             <a href="<?= $edit_on['basepath'] ?>/<?= $page['relative_path'] ?>" target="_blank">
@@ -24,24 +24,20 @@
     </div>
 
     <?php
-    $buttons = (!empty($page['prev']) || !empty($page['next']));
-    $has_option = array_key_exists('jump_buttons', $params['html']);
-    if ($buttons && (($has_option && $params['html']['jump_buttons']) || !$has_option)) {
-    ?>
+    $hasPrevNext = (!empty($page['prev']) || !empty($page['next']));
+    if ($hasPrevNext && $config->getHTML()->showPreviousNextLinks()) {
+        ?>
     <nav>
         <ul class="Pager">
             <?php if (!empty($page['prev'])) {
-        ?><li class=Pager--prev><a href="<?= $base_url . $page['prev']->getUrl() ?>"><?= $this->translate("Link_previous") ?></a></li><?php
-
-    } ?>
+            ?><li class=Pager--prev><a href="<?= $base_url . $page['prev']->getUrl() ?>"><?= $this->translate("Link_previous") ?></a></li><?php
+        } ?>
             <?php if (!empty($page['next'])) {
-        ?><li class=Pager--next><a href="<?= $base_url . $page['next']->getUrl() ?>"><?= $this->translate("Link_next") ?></a></li><?php
-
-    } ?>
+            ?><li class=Pager--next><a href="<?= $base_url . $page['next']->getUrl() ?>"><?= $this->translate("Link_next") ?></a></li><?php
+        } ?>
         </ul>
     </nav>
     <?php
-
-} ?>
+    } ?>
 </article>
 

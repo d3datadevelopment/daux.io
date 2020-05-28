@@ -1,10 +1,11 @@
 <?php namespace Todaymade\Daux\Server;
 
-use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
+use Todaymade\Daux\ConfigBuilder;
 use Todaymade\Daux\Daux;
 use Todaymade\Daux\DauxHelper;
 use Todaymade\Daux\Exception;
@@ -16,7 +17,7 @@ use Todaymade\Daux\Format\HTML\RawPage;
 class Server
 {
     private $daux;
-    private $params;
+    private $config;
     private $base_url;
 
     /**
@@ -24,26 +25,37 @@ class Server
      */
     private $request;
 
+    public function __construct(Daux $daux)
+    {
+        $this->daux = $daux;
+
+        $this->request = Request::createFromGlobals();
+        $this->base_url = $this->request->getHttpHost() . $this->request->getBaseUrl() . '/';
+    }
+
     /**
-     * Serve the documentation
+     * Serve the documentation.
      *
      * @throws Exception
      */
     public static function serve()
     {
-        $output = new NullOutput();
+        $verbosity = getenv('DAUX_VERBOSITY');
+        $output = new ConsoleOutput($verbosity);
 
-        $daux = new Daux(Daux::LIVE_MODE, $output);
-        $daux->initializeConfiguration();
+        $configFile = getenv('DAUX_CONFIG');
+        if ($configFile) {
+            $config = ConfigBuilder::fromFile($configFile);
+        } else {
+            $config = ConfigBuilder::withMode(Daux::LIVE_MODE)->build();
+        }
+
+        $daux = new Daux($config, $output);
 
         $class = $daux->getProcessorClass();
         if (!empty($class)) {
             $daux->setProcessor(new $class($daux, $output, 0));
         }
-
-        // Set this critical configuration
-        // for the tree generation
-        $daux->getParams()['index_key'] = 'index';
 
         // Improve the tree with a processor
         $daux->generateTree();
@@ -53,30 +65,24 @@ class Server
         try {
             $page = $server->handle();
         } catch (NotFoundException $e) {
-            $page = new ErrorPage('An error occured', $e->getMessage(), $daux->getParams());
+            $page = new ErrorPage('An error occured', $e->getMessage(), $daux->getConfig());
         }
 
         $server->createResponse($page)->prepare($server->request)->send();
-    }
-
-    public function __construct(Daux $daux)
-    {
-        $this->daux = $daux;
-
-        $this->request = Request::createFromGlobals();
-        $this->base_url = $this->request->getHttpHost() . $this->request->getBaseUrl() . "/";
     }
 
     /**
      * Create a temporary file with the file suffix, for mime type detection.
      *
      * @param string $postfix
+     *
      * @return string
      */
-    private function getTemporaryFile($postfix) {
+    private function getTemporaryFile($postfix)
+    {
         $sysFileName = tempnam(sys_get_temp_dir(), 'daux');
         if ($sysFileName === false) {
-            throw new \RuntimeException("Could not create temporary file");
+            throw new \RuntimeException('Could not create temporary file');
         }
 
         $newFileName = $sysFileName . $postfix;
@@ -88,15 +94,16 @@ class Server
             return $newFileName;
         }
 
-        throw new \RuntimeException("Could not create temporary file");
+        throw new \RuntimeException('Could not create temporary file');
     }
 
     /**
-     * @param Page $page
      * @return Response
      */
-    public function createResponse(Page $page) {
-
+    public function createResponse(Page $page)
+    {
+        // Add a custom MimeType guesser in case the default ones are not available
+        // This makes sure that at least CSS and JS work fine.
         $mimeTypes = MimeTypes::getDefault();
         $mimeTypes->registerGuesser(new ExtensionMimeTypeGuesser());
 
@@ -107,6 +114,7 @@ class Server
         if ($page instanceof ComputedRawPage) {
             $file = $this->getTemporaryFile($page->getFilename());
             file_put_contents($file, $page->getContent());
+
             return new BinaryFileResponse($file);
         }
 
@@ -116,32 +124,26 @@ class Server
     /**
      * @return \Todaymade\Daux\Config
      */
-    public function getParams()
+    public function getConfig()
     {
-        $params = $this->daux->getParams();
+        $config = $this->daux->getConfig();
 
-        DauxHelper::rebaseConfiguration($params, '//' . $this->base_url);
-        $params['base_page'] = '//' . $this->base_url;
-        if (!$this->daux->options['live']['clean_urls']) {
-            $params['base_page'] .= 'index.php/';
-        }
+        DauxHelper::rebaseConfiguration($config, '//' . $this->base_url);
 
-        // Text search would be too slow on live server
-        $params['html']['search'] = false;
-
-        return $params;
+        return $config;
     }
 
     /**
-     * Handle an incoming request
+     * Handle an incoming request.
      *
-     * @return \Todaymade\Daux\Format\Base\Page
      * @throws Exception
      * @throws NotFoundException
+     *
+     * @return \Todaymade\Daux\Format\Base\Page
      */
     public function handle()
     {
-        $this->params = $this->getParams();
+        $this->config = $this->getConfig();
 
         $request = substr($this->request->getRequestUri(), strlen($this->request->getBaseUrl()) + 1);
 
@@ -157,27 +159,31 @@ class Server
     }
 
     /**
-     * Handle a request on custom themes
+     * Handle a request on custom themes.
      *
      * @param string $request
-     * @return \Todaymade\Daux\Format\Base\Page
+     *
      * @throws NotFoundException
+     *
+     * @return \Todaymade\Daux\Format\Base\Page
      */
     public function serveTheme($request)
     {
-        $file = $this->getParams()->getThemesPath() . $request;
+        $file = $this->getConfig()->getThemesPath() . $request;
 
         if (file_exists($file)) {
             return new RawPage($file);
         }
 
-        throw new NotFoundException;
+        throw new NotFoundException();
     }
 
     /**
      * @param string $request
-     * @return \Todaymade\Daux\Format\Base\Page
+     *
      * @throws NotFoundException
+     *
+     * @return \Todaymade\Daux\Format\Base\Page
      */
     private function getPage($request)
     {
@@ -197,6 +203,6 @@ class Server
             );
         }
 
-        return $this->daux->getGenerator()->generateOne($file, $this->params);
+        return $this->daux->getGenerator()->generateOne($file, $this->config);
     }
 }

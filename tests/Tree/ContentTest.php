@@ -1,15 +1,14 @@
 <?php
 namespace Todaymade\Daux\Tree;
 
-use Todaymade\Daux\Config;
 use PHPUnit\Framework\TestCase;
+use Todaymade\Daux\ConfigBuilder;
 
 class ContentTest extends TestCase
 {
     protected function createContent($content)
     {
-        $config = new Config;
-        $config->setDocumentationDirectory('');
+        $config = ConfigBuilder::withMode()->build();
 
         $dir = new Directory(new Root($config), '');
         $obj = new Content($dir, '');
@@ -32,6 +31,10 @@ class ContentTest extends TestCase
 
     /**
      * @dataProvider providerTestAttributes
+     *
+     * @param mixed $content
+     * @param mixed $attributes
+     * @param mixed $finalContent
      */
     public function testAttributes($content, $attributes, $finalContent)
     {
